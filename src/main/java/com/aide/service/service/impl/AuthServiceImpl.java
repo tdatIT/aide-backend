@@ -8,6 +8,7 @@ import com.aide.service.model.entity.Role;
 import com.aide.service.model.entity.User;
 import com.aide.service.model.entity.UserCredential;
 import com.aide.service.model.enums.CredentialType;
+import com.aide.service.model.enums.RoleEnum;
 import com.aide.service.repository.RoleRepository;
 import com.aide.service.repository.UserCredentialRepository;
 import com.aide.service.repository.UserRepository;
@@ -43,40 +44,29 @@ public class AuthServiceImpl implements AuthService {
 
     @Transactional
     public void register(RegisterRequest request) {
-        if (credentialRepository.existsByUsername(request.getUsername())) {
+        if (userRepository.existsByUsername(request.getUsername())) {
             throw new BusinessException("Username already exists");
         }
 
-        if (credentialRepository.existsByUsername(request.getEmail())) {
-            throw new BusinessException("Email already exists");
-        }
-
-        Role userRole = roleRepository.findByRoleName("ROLE_USER")
+        Role userRole = roleRepository.findByRoleName(RoleEnum.ROLE_USER.toString())
                 .orElseThrow(() -> new BusinessException("Default role not found"));
 
         User user = new User();
         user.setFullName(request.getFullName());
+        user.setUsername(request.getUsername());
         user.setActive(true);
         user.setRoles(new HashSet<>(Set.of(userRole)));
-        userRepository.save(user);
+
 
         // Create password credential
         UserCredential passwordCred = new UserCredential();
-        passwordCred.setUser(user);
         passwordCred.setCredType(CredentialType.PASSWORD);
-        passwordCred.setUsername(request.getUsername());
-        passwordCred.setSecret(passwordEncoder.encode(request.getPassword()));
+        passwordCred.setCredType(CredentialType.PASSWORD);
+        passwordCred.setPassword(passwordEncoder.encode(request.getPassword()));
         passwordCred.setActive(true);
-        credentialRepository.save(passwordCred);
+        user.getCredentials().add(passwordCred);
 
-        // Create email credential
-        UserCredential emailCred = new UserCredential();
-        emailCred.setUser(user);
-        emailCred.setCredType(CredentialType.PASSWORD);
-        emailCred.setUsername(request.getEmail());
-        emailCred.setSecret(passwordEncoder.encode(request.getPassword()));
-        emailCred.setActive(true);
-        credentialRepository.save(emailCred);
+        userRepository.save(user);
     }
 
     public TokenResponse login(LoginRequest request) {
@@ -105,10 +95,11 @@ public class AuthServiceImpl implements AuthService {
 
     public TokenResponse refreshToken(String refreshToken) {
         String username = jwtService.extractUsername(refreshToken);
-        UserDetails userDetails = credentialRepository.findByUsername(username)
+
+        UserDetails userDetails = credentialRepository.findByUsernameAndCredType(username, CredentialType.PASSWORD)
                 .map(cred -> org.springframework.security.core.userdetails.User.builder()
-                        .username(cred.getUsername())
-                        .password(cred.getSecret())
+                        .username(cred.getUser().getUsername())
+                        .password(cred.getPassword())
                         .authorities(cred.getUser().getRoles().stream()
                                 .map(role -> "ROLE_" + role.getRoleName())
                                 .toArray(String[]::new))

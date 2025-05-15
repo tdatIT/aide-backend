@@ -30,3 +30,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Environment Configurations ###
+src/main/resources/application-*.yaml

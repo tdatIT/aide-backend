@@ -12,6 +12,6 @@ public enum CredentialType {
     /**
      * OpenID Connect authentication
      */
-    OIDC
+    OIDC,
 } 
  

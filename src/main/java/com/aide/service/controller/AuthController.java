@@ -4,8 +4,10 @@ import com.aide.service.common.BaseResponse;
 import com.aide.service.model.dto.auth.LoginRequest;
 import com.aide.service.model.dto.auth.RegisterRequest;
 import com.aide.service.model.dto.auth.TokenResponse;
+import com.aide.service.model.dto.auth.GoogleTokenRequest;
 import com.aide.service.service.AuthService;
 import com.aide.service.service.ForgotPasswordService;
+import com.aide.service.service.OAuth2Service;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -21,6 +23,7 @@ public class AuthController {
 
     private final AuthService authService;
     private final ForgotPasswordService forgotPasswordService;
+    private final OAuth2Service oAuth2Service;
 
     @PostMapping("/register")
     @Operation(summary = "Register a new user")
@@ -69,5 +72,12 @@ public class AuthController {
             @RequestParam String newPassword) {
         forgotPasswordService.resetPassword(email, otp, newPassword);
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/oauth2/google")
+    @Operation(summary = "Authenticate with Google ID token")
+    public ResponseEntity<BaseResponse<TokenResponse>> googleLogin(@Valid @RequestBody GoogleTokenRequest request) {
+        TokenResponse tokenResponse = oAuth2Service.verifyGoogleToken(request.getIdToken());
+        return ResponseEntity.ok(BaseResponse.success(tokenResponse));
     }
 } 

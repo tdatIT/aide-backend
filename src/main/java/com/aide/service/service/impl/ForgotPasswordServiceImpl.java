@@ -3,7 +3,10 @@ package com.aide.service.service.impl;
 import com.aide.service.exception.BadRequestException;
 import com.aide.service.model.entity.User;
 import com.aide.service.model.entity.OTP;
+import com.aide.service.model.entity.UserCredential;
+import com.aide.service.model.enums.CredentialType;
 import com.aide.service.repository.OTPRepository;
+import com.aide.service.repository.UserCredentialRepository;
 import com.aide.service.repository.UserRepository;
 import com.aide.service.service.EmailService;
 import com.aide.service.service.ForgotPasswordService;
@@ -19,6 +22,7 @@ import java.util.Random;
 @RequiredArgsConstructor
 public class ForgotPasswordServiceImpl implements ForgotPasswordService {
     private final UserRepository userRepository;
+    private final UserCredentialRepository userCredentialRepository;
     private final OTPRepository otpRepository;
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
@@ -53,9 +57,11 @@ public class ForgotPasswordServiceImpl implements ForgotPasswordService {
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BadRequestException("User not found"));
+        UserCredential cred = userCredentialRepository.findByUserIdAndCredType(user.getId(), CredentialType.PASSWORD)
+                .orElseThrow(() -> new BadRequestException("Credential not found"));
 
-        user.setPassword(passwordEncoder.encode(newPassword));
-        userRepository.save(user);
+        cred.setPassword(passwordEncoder.encode(newPassword));
+        userCredentialRepository.save(cred);
 
         otpEntity.setUsed(true);
         otpRepository.save(otpEntity);

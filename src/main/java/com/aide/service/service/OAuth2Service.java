@@ -1,7 +1,7 @@
 package com.aide.service.service;
 
-import org.springframework.security.oauth2.core.user.OAuth2User;
+import com.aide.service.model.dto.auth.TokenResponse;
 
 public interface OAuth2Service {
-    String processOAuthPostLogin(OAuth2User oAuth2User);
+    TokenResponse verifyGoogleToken(String idToken);
 } 
