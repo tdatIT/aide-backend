@@ -1,9 +1,9 @@
 package com.aide.backend.service.impl;
 
 import com.aide.backend.exception.BadRequestException;
-import com.aide.backend.model.entity.User;
-import com.aide.backend.model.entity.OTP;
-import com.aide.backend.model.entity.UserCredential;
+import com.aide.backend.model.entity.user.User;
+import com.aide.backend.model.entity.user.OTP;
+import com.aide.backend.model.entity.user.UserCredential;
 import com.aide.backend.model.enums.CredentialType;
 import com.aide.backend.repository.OTPRepository;
 import com.aide.backend.repository.UserCredentialRepository;
@@ -72,4 +72,4 @@ public class ForgotPasswordServiceImpl implements ForgotPasswordService {
         int otp = 100000 + random.nextInt(900000);
         return String.valueOf(otp);
     }
-} 
+}

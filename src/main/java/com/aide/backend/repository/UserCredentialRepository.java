@@ -1,6 +1,6 @@
 package com.aide.backend.repository;
 
-import com.aide.backend.model.entity.UserCredential;
+import com.aide.backend.model.entity.user.UserCredential;
 import com.aide.backend.model.enums.CredentialType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -14,4 +14,4 @@ public interface UserCredentialRepository extends JpaRepository<UserCredential, 
 
     @Query("select cred from UserCredential cred where cred.user.username = :username and cred.credType = :credType and  cred.active = true")
     Optional<UserCredential> findByUsernameAndCredType(String username, CredentialType credType);
-} 
+}

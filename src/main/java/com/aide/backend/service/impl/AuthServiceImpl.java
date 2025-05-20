@@ -4,9 +4,9 @@ import com.aide.backend.exception.BusinessException;
 import com.aide.backend.model.dto.auth.LoginRequest;
 import com.aide.backend.model.dto.auth.RegisterRequest;
 import com.aide.backend.model.dto.auth.TokenResponse;
-import com.aide.backend.model.entity.Role;
-import com.aide.backend.model.entity.User;
-import com.aide.backend.model.entity.UserCredential;
+import com.aide.backend.model.entity.user.Role;
+import com.aide.backend.model.entity.user.User;
+import com.aide.backend.model.entity.user.UserCredential;
 import com.aide.backend.model.enums.CredentialType;
 import com.aide.backend.model.enums.RoleEnum;
 import com.aide.backend.repository.RoleRepository;
@@ -44,7 +44,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Transactional
     public void register(RegisterRequest request) {
-        if (userRepository.existsByUsername(request.getUsername())) {
+        if (userRepository.existsByUsername(request.getEmail())) {
             throw new BusinessException("Username already exists");
         }
 
@@ -53,7 +53,8 @@ public class AuthServiceImpl implements AuthService {
 
         User user = new User();
         user.setFullName(request.getFullName());
-        user.setUsername(request.getUsername());
+        user.setUsername(request.getEmail());
+        user.setEmail(request.getEmail());
         user.setActive(true);
         user.setRoles(new HashSet<>(Set.of(userRole)));
 
@@ -64,6 +65,7 @@ public class AuthServiceImpl implements AuthService {
         passwordCred.setCredType(CredentialType.PASSWORD);
         passwordCred.setPassword(passwordEncoder.encode(request.getPassword()));
         passwordCred.setActive(true);
+        passwordCred.setUser(user);
         user.getCredentials().add(passwordCred);
 
         userRepository.save(user);
@@ -119,4 +121,4 @@ public class AuthServiceImpl implements AuthService {
                 .expiresIn(24 * 60 * 60)
                 .build();
     }
-} 
+}

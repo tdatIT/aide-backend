@@ -1,8 +1,9 @@
 package com.aide.backend.service.impl;
 
-import com.aide.backend.model.entity.AuthUserDetails;
+import com.aide.backend.model.entity.user.AuthUserDetails;
 import com.aide.backend.model.enums.CredentialType;
 import com.aide.backend.repository.UserCredentialRepository;
+import com.aide.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -15,19 +16,19 @@ import org.springframework.transaction.annotation.Transactional;
 public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserCredentialRepository userCredentialRepository;
+    private final UserRepository userRepository;
 
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userCredentialRepository.findByUsernameAndCredType(username, CredentialType.PASSWORD)
-                .map(credential -> new AuthUserDetails(
-                        credential.getUser().getUsername(),
-                        credential.getPassword(),
-                        credential.isActive(),
-                        true,
-                        true,
-                        true
-                ))
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+        var user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+        var cred = userCredentialRepository.findByUsernameAndCredType(username, CredentialType.PASSWORD);
+
+        String password = "";
+        if (cred.isPresent()) {
+            password = cred.get().getPassword();
+        }
+
+        return new AuthUserDetails(user.getUsername(), password, user.isActive(), true, true, true);
     }
-} 
+}

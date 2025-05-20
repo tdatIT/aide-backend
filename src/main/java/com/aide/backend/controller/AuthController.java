@@ -1,10 +1,7 @@
 package com.aide.backend.controller;
 
 import com.aide.backend.common.BaseResponse;
-import com.aide.backend.model.dto.auth.LoginRequest;
-import com.aide.backend.model.dto.auth.RegisterRequest;
-import com.aide.backend.model.dto.auth.TokenResponse;
-import com.aide.backend.model.dto.auth.GoogleTokenRequest;
+import com.aide.backend.model.dto.auth.*;
 import com.aide.backend.service.AuthService;
 import com.aide.backend.service.ForgotPasswordService;
 import com.aide.backend.service.OAuth2Service;
@@ -76,8 +73,8 @@ public class AuthController {
 
     @PostMapping("/oauth2/google")
     @Operation(summary = "Authenticate with Google ID token")
-    public ResponseEntity<BaseResponse<TokenResponse>> googleLogin(@Valid @RequestBody GoogleTokenRequest request) {
-        TokenResponse tokenResponse = oAuth2Service.verifyGoogleToken(request.getIdToken());
-        return ResponseEntity.ok(BaseResponse.success(tokenResponse));
+    public ResponseEntity<BaseResponse<LoginResponse>> googleLogin(@RequestParam String token) {
+        LoginResponse res = oAuth2Service.handleGoogleAccessToken(token);
+        return ResponseEntity.ok(BaseResponse.success(res));
     }
-} 
+}

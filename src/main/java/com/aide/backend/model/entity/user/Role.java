@@ -1,4 +1,4 @@
-package com.aide.backend.model.entity;
+package com.aide.backend.model.entity.user;
 
 import com.aide.backend.common.BaseEntity;
 import jakarta.persistence.*;
@@ -13,7 +13,7 @@ import java.util.Set;
 @Entity
 @Table(name = "roles")
 public class Role extends BaseEntity {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -29,4 +29,4 @@ public class Role extends BaseEntity {
 
     @ManyToMany(mappedBy = "roles")
     private Set<User> users = new HashSet<>();
-} 
+}

@@ -1,4 +1,4 @@
-package com.aide.backend.model.entity;
+package com.aide.backend.model.entity.user;
 
 import com.aide.backend.common.BaseEntity;
 import com.aide.backend.model.enums.CredentialType;
@@ -20,18 +20,14 @@ public class UserCredential extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "cred_type", length = 20, nullable = false)
     private CredentialType credType;
 
-    @Column(length = 100, nullable = false)
+    @Column(length = 100)
     private String provider;
 
-    @Column(length = 100, nullable = false)
+    @Column(length = 100)
     private String oidcUserId;
 
     @Column(length = 200)
@@ -42,4 +38,9 @@ public class UserCredential extends BaseEntity {
 
     @Column(name = "attempt_count")
     private Integer attemptCount;
-} 
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+}

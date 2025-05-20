@@ -1,4 +1,4 @@
-package com.aide.backend.model.entity;
+package com.aide.backend.model.entity.user;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -28,4 +28,4 @@ public class OTP {
 
     @Column(nullable = false)
     private boolean used;
-} 
+}

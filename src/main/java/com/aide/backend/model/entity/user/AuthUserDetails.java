@@ -1,4 +1,4 @@
-package com.aide.backend.model.entity;
+package com.aide.backend.model.entity.user;
 
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;

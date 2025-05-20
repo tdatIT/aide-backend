@@ -1,4 +1,4 @@
-package com.aide.backend.model.entity;
+package com.aide.backend.model.entity.user;
 
 import com.aide.backend.common.BaseEntity;
 import jakarta.persistence.*;
@@ -22,7 +22,7 @@ public class User extends BaseEntity {
     @Column(unique = true, nullable = false)
     private String username;
 
-    @Column(nullable = false)
+    @Column(unique = true)
     private String email;
 
     @Column(nullable = false)
@@ -40,8 +40,8 @@ public class User extends BaseEntity {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
-    private Set<Role> roles;
+    private Set<Role> roles = new HashSet<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<UserCredential> credentials = new HashSet<>();
-} 
+}
