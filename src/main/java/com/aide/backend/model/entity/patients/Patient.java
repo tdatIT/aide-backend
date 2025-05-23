@@ -22,6 +22,9 @@ public class Patient extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(length = 150)
+    private String name;
+
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
     private Gender gender;
@@ -46,11 +49,22 @@ public class Patient extends BaseEntity {
     @ColumnDefault("0")
     private Long requestCounter;
 
-    @OneToMany
-    @JoinColumn(name = "patient_id")
-    private Set<ClinicalExamCategory> clinicalExamCategories = new HashSet<>();
+    @Column(nullable = false)
+    private Integer status;
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "patient_id")
-    private Set<ParaclinicalTestCategory> paraclinicalTestCategories = new HashSet<>();
+    private Set<ClinicalExamResult> clinicalExamResults = new HashSet<>();
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "patient_id")
+    private Set<ParaclinicalExamResult> paraclinicalExamResults = new HashSet<>();
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "diagnosis_id", referencedColumnName = "id")
+    private Diagnosis diagnosis;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "treatment_id", referencedColumnName = "id")
+    private Treatment treatment;
 }

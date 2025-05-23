@@ -8,7 +8,8 @@ import java.util.List;
 
 @Data
 @Builder
-public class CreatePatientCaseRequest {
+public class PatientCaseDTO {
+    private Long id;
     private String name;
     private String gender;
     private Integer age;
@@ -17,8 +18,12 @@ public class CreatePatientCaseRequest {
     private String dentalHistory;
     private String[] suggestedTests;
     private Long requestCounter;
-    private List<CreateTestResultItems> clinicalExams;
-    private List<CreateTestResultItems> paraclinicalTests;
+    private List<ClinicalExamDTO> clinicalExams;
+    private List<ParaclinicalTestDTO> paraclinicalTests;
     private DiagnosisDTO diagnosis;
     private TreatmentDTO treatment;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    private String createdBy;
+    private String updatedBy;
 }

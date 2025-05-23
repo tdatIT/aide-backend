@@ -23,7 +23,6 @@ public class Diagnosis extends BaseEntity {
     @Column(columnDefinition = "text")
     private String notes;
 
-    @OneToOne
-    @JoinColumn(name = "patient_id", referencedColumnName = "id")
+    @OneToOne(mappedBy = "diagnosis")
     private Patient patient;
 }

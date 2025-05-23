@@ -8,7 +8,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "treatments")
+@Table(name = "ççç")
 public class Treatment extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,8 +20,7 @@ public class Treatment extends BaseEntity {
     @Column(columnDefinition = "text")
     private String notes;
 
-    @OneToOne
-    @JoinColumn(name = "patient_id", referencedColumnName = "id")
+    @OneToOne(mappedBy = "treatment")
     private Patient patient;
 }
 
