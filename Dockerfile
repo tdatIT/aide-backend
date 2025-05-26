@@ -18,9 +18,7 @@ RUN mvn dependency:go-offline
 COPY src src
 
 # Build the application
-RUN mvn clean package -DskipTests \
-    && mkdir -p target/dependency \
-    && (cd target/dependency; jar -xf ../*.jar)
+RUN mvn clean package -DskipTests
 
 # Runtime stage
 FROM eclipse-temurin:21-jre-alpine
@@ -30,10 +28,8 @@ RUN addgroup -S spring && adduser -S spring -G spring
 
 WORKDIR /app
 
-# Copy dependencies and application
-COPY --from=build /workspace/app/target/dependency/BOOT-INF/lib /app/lib
-COPY --from=build /workspace/app/target/dependency/META-INF /app/META-INF
-COPY --from=build /workspace/app/target/dependency/BOOT-INF/classes /app
+# Copy the built jar file
+COPY --from=build /workspace/app/target/*.jar app.jar
 
 # Set proper permissions
 RUN chown -R spring:spring /app
@@ -41,7 +37,7 @@ RUN chown -R spring:spring /app
 # Switch to non-root user
 USER spring
 
-# Configure JVM options and Spring profile
+# Configure JVM options
 ENV JAVA_OPTS="-Xms512m -Xmx1024m -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
 
 # Add health check
@@ -52,4 +48,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=60s \
 EXPOSE 8080
 
 # Set the entrypoint with optimized JVM options
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE} -cp app:app/lib/* com.aide.backend.AideBackendApplication"]
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
