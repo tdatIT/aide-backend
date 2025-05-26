@@ -1,5 +1,9 @@
 package com.aide.backend.model.dto.patients;
 
+import com.aide.backend.model.enums.Gender;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
 
@@ -9,16 +13,39 @@ import java.util.List;
 @Data
 @Builder
 public class CreatePatientCaseRequest {
+    @NotBlank
     private String name;
-    private String gender;
+
+    @NotBlank
+    private Gender gender;
+
+    @NotEmpty
     private Integer age;
+
+    @NotBlank
     private String occupation;
+
+    @NotBlank
     private String medicalHistory;
+
+    @NotBlank
     private String dentalHistory;
+
+    @NotEmpty
     private String[] suggestedTests;
+
+    @NotNull
     private Long requestCounter;
+
+    @NotEmpty
     private List<CreateTestResultItems> clinicalExams;
+
+    @NotEmpty
     private List<CreateTestResultItems> paraclinicalTests;
+
+    @NotNull
     private DiagnosisDTO diagnosis;
+
+    @NotNull
     private TreatmentDTO treatment;
 }

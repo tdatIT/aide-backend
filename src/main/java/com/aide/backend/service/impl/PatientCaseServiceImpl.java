@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -50,7 +51,7 @@ public class PatientCaseServiceImpl implements PatientCaseService {
     public void delete(Long id) {
         Patient patient = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Patient case not found with id: " + id));
-        patient.setStatus(0);
+        patient.setDeletedAt(LocalDateTime.now());
         repository.save(patient);
     }
 
@@ -69,7 +70,7 @@ public class PatientCaseServiceImpl implements PatientCaseService {
 
     private void updatePatientFromRequest(Patient patient, CreatePatientCaseRequest request) {
         patient.setName(request.getName());
-        patient.setGender(Gender.valueOf(request.getGender()));
+        patient.setGender(request.getGender());
         patient.setAge(request.getAge());
         patient.setOccupation(request.getOccupation());
         patient.setMedicalHistory(request.getMedicalHistory());

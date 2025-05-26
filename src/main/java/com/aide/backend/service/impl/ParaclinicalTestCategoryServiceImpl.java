@@ -12,6 +12,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class ParaclinicalTestCategoryServiceImpl implements ParaclinicalTestCategoryService {
@@ -32,7 +34,7 @@ public class ParaclinicalTestCategoryServiceImpl implements ParaclinicalTestCate
     public ParaclinicalTestCategoryDTO update(Long id, ParaclinicalTestCategoryDTO dto) {
         ParaclinicalTestCategory category = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Paraclinical test category not found with id: " + id));
-        
+
         category.setName(dto.getName());
         category.setDescription(dto.getDescription());
         return mapToDTO(repository.save(category));
@@ -41,10 +43,11 @@ public class ParaclinicalTestCategoryServiceImpl implements ParaclinicalTestCate
     @Override
     @Transactional
     public void delete(Long id) {
-        if (!repository.existsById(id)) {
-            throw new ResourceNotFoundException("Paraclinical test category not found with id: " + id);
-        }
-        repository.deleteById(id);
+        var category = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Paraclinical test category not found with id: " + id));
+        category.setDeletedAt(LocalDateTime.now());
+
+        repository.save(category);
     }
 
     @Override
@@ -67,4 +70,4 @@ public class ParaclinicalTestCategoryServiceImpl implements ParaclinicalTestCate
         dto.setDescription(category.getDescription());
         return dto;
     }
-} 
+}

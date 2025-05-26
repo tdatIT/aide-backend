@@ -6,11 +6,14 @@ import com.aide.backend.model.dto.common.PageResponse;
 import com.aide.backend.model.entity.patients.ClinicalExamCategory;
 import com.aide.backend.repository.ClinicalExamCategoryRepository;
 import com.aide.backend.service.ClinicalExamCategoryService;
+import com.google.api.client.util.DateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -41,10 +44,10 @@ public class ClinicalExamCategoryServiceImpl implements ClinicalExamCategoryServ
     @Override
     @Transactional
     public void delete(Long id) {
-        if (!repository.existsById(id)) {
-            throw new ResourceNotFoundException("Clinical exam category not found with id: " + id);
-        }
-        repository.deleteById(id);
+        var category = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Clinical exam category not found with id: " + id));
+        category.setDeletedAt(LocalDateTime.now());
+        repository.save(category);
     }
 
     @Override
