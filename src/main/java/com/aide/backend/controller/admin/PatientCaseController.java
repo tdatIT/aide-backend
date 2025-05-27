@@ -44,4 +44,10 @@ public class PatientCaseController {
     public ResponseEntity<BaseResponse<PageResponse<PatientCaseDTO>>> findAll(Pageable pageable) {
         return ResponseEntity.ok(BaseResponse.success(service.findAll(pageable)));
     }
+
+    @PutMapping("/{id}/status")
+    public ResponseEntity<BaseResponse<Void>> updateStatus(@PathVariable Long id, @RequestParam boolean isPublished) {
+        service.updateStatus(id, isPublished);
+        return ResponseEntity.ok(BaseResponse.success("Patient case status updated successfully", null));
+    }
 }

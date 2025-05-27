@@ -11,4 +11,5 @@ public interface PatientCaseService {
     void delete(Long id);
     PatientCaseDTO findById(Long id);
     PageResponse<PatientCaseDTO> findAll(Pageable pageable);
-} 
+    void updateStatus(Long id, boolean isPublished);
+}

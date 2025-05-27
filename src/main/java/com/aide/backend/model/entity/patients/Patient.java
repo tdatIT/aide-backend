@@ -1,11 +1,10 @@
 package com.aide.backend.model.entity.patients;
 
 import com.aide.backend.common.BaseEntity;
-import com.aide.backend.common.StringArrayType;
 import com.aide.backend.model.enums.Gender;
+import com.aide.backend.model.enums.PatientStatus;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -14,11 +13,14 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
-@Getter
-@Setter
 @Entity
 @Table(name = "patients")
-public class Patient extends BaseEntity{
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class Patient extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -47,11 +49,10 @@ public class Patient extends BaseEntity{
     private String[] suggestedTests;
 
     @Column()
-    @ColumnDefault("0")
-    private Long requestCounter;
+    private Long requestCounter=0L;
 
-    @Column(nullable = false)
-    private Integer status;
+    @Column(nullable = false, length = 50)
+    private String status = PatientStatus.UNPUBLISHED.toString();
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "patient_id")

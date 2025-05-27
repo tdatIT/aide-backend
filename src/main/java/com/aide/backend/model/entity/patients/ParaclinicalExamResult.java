@@ -2,13 +2,15 @@ package com.aide.backend.model.entity.patients;
 
 import com.aide.backend.common.Result;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Table(name = "paraclinical_exam_results")
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ParaclinicalExamResult extends Result {
     @ManyToOne
     @JoinColumn(name = "paraclinical_test_cate_id", nullable = false)
@@ -19,6 +21,6 @@ public class ParaclinicalExamResult extends Result {
     private Patient patient;
 
     @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "image_id", nullable = false)
+    @JoinColumn(name = "image_id", nullable = true)
     private Image image;
 }

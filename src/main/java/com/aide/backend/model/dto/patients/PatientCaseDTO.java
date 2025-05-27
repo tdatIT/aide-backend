@@ -18,6 +18,7 @@ public class PatientCaseDTO {
     private String dentalHistory;
     private String[] suggestedTests;
     private Long requestCounter;
+    private String status;
     private List<ClinicalExamDTO> clinicalExams;
     private List<ParaclinicalTestDTO> paraclinicalTests;
     private DiagnosisDTO diagnosis;

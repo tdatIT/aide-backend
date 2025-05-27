@@ -4,6 +4,7 @@ import com.aide.backend.exception.ResourceNotFoundException;
 import com.aide.backend.model.dto.patients.*;
 import com.aide.backend.model.dto.common.PageResponse;
 import com.aide.backend.model.entity.patients.*;
+import com.aide.backend.model.enums.PatientStatus;
 import com.aide.backend.repository.*;
 import com.aide.backend.service.PatientCaseService;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.aide.backend.model.enums.PatientStatus.UNPUBLISHED;
+
 @Service
 @RequiredArgsConstructor
 public class PatientCaseServiceImpl implements PatientCaseService {
@@ -29,9 +32,23 @@ public class PatientCaseServiceImpl implements PatientCaseService {
     @Override
     @Transactional
     public PatientCaseDTO create(CreatePatientCaseRequest request) {
-        Patient patient = new Patient();
-        updatePatientFromRequest(patient, request);
-        patient.setStatus(1);
+        Patient patient = Patient.builder()
+                .name(request.getName())
+                .gender(request.getGender())
+                .age(request.getAge())
+                .occupation(request.getOccupation())
+                .medicalHistory(request.getMedicalHistory())
+                .dentalHistory(request.getDentalHistory())
+                .suggestedTests(request.getSuggestedTests())
+                .requestCounter(request.getRequestCounter())
+                .status(UNPUBLISHED.toString())
+                .build();
+
+        handleClinicalExams(patient, request.getClinicalExams());
+        handleParaclinicalTests(patient, request.getParaclinicalTests());
+        handleDiagnosis(patient, request.getDiagnosis());
+        handleTreatment(patient, request.getTreatment());
+
         return mapToDTO(repository.save(patient));
     }
 
@@ -41,8 +58,152 @@ public class PatientCaseServiceImpl implements PatientCaseService {
         Patient patient = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Patient case not found with id: " + id));
 
-        updatePatientFromRequest(patient, request);
+        updateBasicPatientInfo(patient, request);
+
+        // Update clinical exams
+        if (request.getClinicalExams() != null) {
+            patient.setClinicalExamResults(new HashSet<>(updateClinicalExams(patient, request.getClinicalExams())));
+        }
+
+        // Update paraclinical tests
+        if (request.getParaclinicalTests() != null) {
+            patient.setParaclinicalExamResults(new HashSet<>(updateParaclinicalTests(patient, request.getParaclinicalTests())));
+        }
+
+        // Update diagnosis
+        if (request.getDiagnosis() != null) {
+            patient.setDiagnosis(updateDiagnosis(patient, request.getDiagnosis()));
+        }
+
+        // Update treatment
+        if (request.getTreatment() != null) {
+            patient.setTreatment(updateTreatment(patient, request.getTreatment()));
+        }
+
         return mapToDTO(repository.save(patient));
+    }
+
+    private void updateBasicPatientInfo(Patient patient, CreatePatientCaseRequest request) {
+        patient.setName(request.getName());
+        patient.setGender(request.getGender());
+        patient.setAge(request.getAge());
+        patient.setOccupation(request.getOccupation());
+        patient.setMedicalHistory(request.getMedicalHistory());
+        patient.setDentalHistory(request.getDentalHistory());
+        patient.setSuggestedTests(request.getSuggestedTests());
+        patient.setRequestCounter(request.getRequestCounter());
+    }
+
+    private void handleClinicalExams(Patient patient, List<CreateTestResultItems> clinicalExams) {
+        if (clinicalExams == null || clinicalExams.isEmpty()) {
+            return;
+        }
+        patient.setClinicalExamResults(new HashSet<>(createClinicalExams(patient, clinicalExams)));
+    }
+
+    private void handleParaclinicalTests(Patient patient, List<CreateTestResultItems> paraclinicalTests) {
+        if (paraclinicalTests == null || paraclinicalTests.isEmpty()) {
+            return;
+        }
+        patient.setParaclinicalExamResults(new HashSet<>(createParaclinicalTests(patient, paraclinicalTests)));
+    }
+
+    private void handleDiagnosis(Patient patient, DiagnosisDTO diagnosis) {
+        if (diagnosis == null) {
+            return;
+        }
+        patient.setDiagnosis(createDiagnosis(patient, diagnosis));
+    }
+
+    private void handleTreatment(Patient patient, TreatmentDTO treatment) {
+        if (treatment == null) {
+            return;
+        }
+        patient.setTreatment(createTreatment(patient, treatment));
+    }
+
+    private List<ClinicalExamResult> createClinicalExams(Patient patient, List<CreateTestResultItems> clinicalExams) {
+        return clinicalExams.stream()
+                .map(item -> {
+                    ClinicalExamResult result = ClinicalExamResult.builder()
+                            .patient(patient)
+                            .clinicalExamCategories(findClinicalExamCategory(item.getTestCategoryId()))
+                            .build();
+                    result.setResult(item.getResult());
+                    result.setNotes(item.getNotes());
+
+                    if (isValidImageKey(item.getImageKey())) {
+                        result.setImage(findImage(item.getImageKey()));
+                    }
+                    return result;
+                })
+                .toList();
+    }
+
+    private List<ClinicalExamResult> updateClinicalExams(Patient patient, List<CreateTestResultItems> clinicalExams) {
+        return createClinicalExams(patient, clinicalExams);
+    }
+
+    private List<ParaclinicalExamResult> createParaclinicalTests(Patient patient, List<CreateTestResultItems> paraclinicalTests) {
+        return paraclinicalTests.stream()
+                .map(item -> {
+                    ParaclinicalExamResult result = ParaclinicalExamResult.builder()
+                            .patient(patient)
+                            .paraclinicalTestCategory(findParaclinicalTestCategory(item.getTestCategoryId()))
+                            .build();
+                    result.setResult(item.getResult());
+                    result.setNotes(item.getNotes());
+
+                    if (isValidImageKey(item.getImageKey())) {
+                        result.setImage(findImage(item.getImageKey()));
+                    }
+                    return result;
+                })
+                .toList();
+    }
+
+    private List<ParaclinicalExamResult> updateParaclinicalTests(Patient patient, List<CreateTestResultItems> paraclinicalTests) {
+        return createParaclinicalTests(patient, paraclinicalTests);
+    }
+
+    private Diagnosis createDiagnosis(Patient patient, DiagnosisDTO diagnosisDTO) {
+        Diagnosis diagnosis = new Diagnosis();
+        diagnosis.setPatient(patient);
+        diagnosis.setDiagnosisName(diagnosisDTO.getDiagnosisName());
+        diagnosis.setDescription(diagnosisDTO.getDescription());
+        diagnosis.setNotes(diagnosisDTO.getNotes());
+        return diagnosis;
+    }
+
+    private Diagnosis updateDiagnosis(Patient patient, DiagnosisDTO diagnosisDTO) {
+        Diagnosis diagnosis = patient.getDiagnosis();
+        if (diagnosis == null) {
+            diagnosis = new Diagnosis();
+            diagnosis.setPatient(patient);
+        }
+        diagnosis.setDiagnosisName(diagnosisDTO.getDiagnosisName());
+        diagnosis.setDescription(diagnosisDTO.getDescription());
+        diagnosis.setNotes(diagnosisDTO.getNotes());
+        return diagnosis;
+    }
+
+    private Treatment createTreatment(Patient patient, TreatmentDTO treatmentDTO) {
+        Treatment treatment = new Treatment();
+        treatment.setPatient(patient);
+        treatment.setDescription(treatmentDTO.getDescription());
+        treatment.setNotes(treatmentDTO.getNotes());
+        return treatment;
+    }
+
+    private Treatment updateTreatment(Patient patient, TreatmentDTO treatmentDTO) {
+        Treatment treatment = patient.getTreatment();
+        if (treatment == null) {
+            treatment = new Treatment();
+            treatment.setPatient(patient);
+        }
+        treatment.setDescription(treatmentDTO.getDescription());
+        treatment.setNotes(treatmentDTO.getNotes());
+        return treatment;
     }
 
     @Override
@@ -67,80 +228,13 @@ public class PatientCaseServiceImpl implements PatientCaseService {
         return PageResponse.of(page.map(this::mapToDTO));
     }
 
-    private void updatePatientFromRequest(Patient patient, CreatePatientCaseRequest request) {
-        patient.setName(request.getName());
-        patient.setGender(request.getGender());
-        patient.setAge(request.getAge());
-        patient.setOccupation(request.getOccupation());
-        patient.setMedicalHistory(request.getMedicalHistory());
-        patient.setDentalHistory(request.getDentalHistory());
-        patient.setSuggestedTests(request.getSuggestedTests());
-        patient.setRequestCounter(request.getRequestCounter());
-
-        // Update clinical exams
-        if (request.getClinicalExams() != null) {
-            List<ClinicalExamResult> clinicalExams = request.getClinicalExams().stream()
-                    .map(item -> {
-                        ClinicalExamResult result = new ClinicalExamResult();
-                        result.setPatient(patient);
-                        result.setClinicalExamCategories(clinicalExamCategoryRepository.findById(item.getTestCategoryId())
-                                .orElseThrow(() -> new ResourceNotFoundException("Clinical exam category not found")));
-                        result.setResult(item.getResult());
-                        result.setNotes(item.getNotes());
-                        if (item.getImageKey() != null) {
-                            result.setImage(imageRepository.findById(item.getImageKey())
-                                    .orElseThrow(() -> new ResourceNotFoundException("Image not found")));
-                        }
-                        return result;
-                    })
-                    .toList();
-            patient.setClinicalExamResults(new HashSet<>(clinicalExams));
-        }
-
-        // Update paraclinical tests
-        if (request.getParaclinicalTests() != null) {
-            List<ParaclinicalExamResult> paraclinicalTests = request.getParaclinicalTests().stream()
-                    .map(item -> {
-                        ParaclinicalExamResult result = new ParaclinicalExamResult();
-                        result.setPatient(patient);
-                        result.setParaclinicalTestCategory(paraclinicalTestCategoryRepository.findById(item.getTestCategoryId())
-                                .orElseThrow(() -> new ResourceNotFoundException("Paraclinical test category not found")));
-                        result.setResult(item.getResult());
-                        result.setNotes(item.getNotes());
-                        if (item.getImageKey() != null) {
-                            result.setImage(imageRepository.findById(item.getImageKey())
-                                    .orElseThrow(() -> new ResourceNotFoundException("Image not found")));
-                        }
-                        return result;
-                    })
-                    .toList();
-            patient.setParaclinicalExamResults(new HashSet<>(paraclinicalTests));
-        }
-
-        // Update diagnosis
-        if (request.getDiagnosis() != null) {
-            Diagnosis diagnosis = patient.getDiagnosis();
-            if (diagnosis == null) {
-                diagnosis = new Diagnosis();
-                diagnosis.setPatient(patient);
-            }
-            diagnosis.setDiagnosisName(request.getDiagnosis().getDiagnosisName());
-            diagnosis.setDescription(request.getDiagnosis().getDescription());
-            diagnosis.setNotes(request.getDiagnosis().getNotes());
-            patient.setDiagnosis(diagnosis);
-        }
-
-        // Update treatment
-        if (request.getTreatment() != null) {
-            Treatment treatment = patient.getTreatment();
-            if (treatment == null) {
-                treatment = new Treatment();
-                treatment.setPatient(patient);
-            }
-            treatment.setDescription(request.getTreatment().getDescription());
-            treatment.setNotes(request.getTreatment().getNotes());
-            patient.setTreatment(treatment);
-        }
+    @Override
+    @Transactional
+    public void updateStatus(Long id, boolean isPublished) {
+        Patient patient = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Patient case not found with id: " + id));
+        patient.setStatus(isPublished ? PatientStatus.PUBLISHED.toString() : PatientStatus.UNPUBLISHED.toString());
+        repository.save(patient);
     }
 
     private PatientCaseDTO mapToDTO(Patient patient) {
@@ -149,6 +243,7 @@ public class PatientCaseServiceImpl implements PatientCaseService {
                 .name(patient.getName())
                 .gender(patient.getGender().toString())
                 .age(patient.getAge())
+                .status(patient.getStatus())
                 .occupation(patient.getOccupation())
                 .medicalHistory(patient.getMedicalHistory())
                 .dentalHistory(patient.getDentalHistory())
@@ -206,8 +301,28 @@ public class PatientCaseServiceImpl implements PatientCaseService {
     private TreatmentDTO mapToTreatmentDTO(Treatment treatment) {
         if (treatment == null) return null;
         TreatmentDTO dto = new TreatmentDTO();
+        dto.setId(treatment.getId());
         dto.setDescription(treatment.getDescription());
         dto.setNotes(treatment.getNotes());
         return dto;
+    }
+
+    private ClinicalExamCategory findClinicalExamCategory(Long id) {
+        return clinicalExamCategoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Clinical exam category not found with id: " + id));
+    }
+
+    private ParaclinicalTestCategory findParaclinicalTestCategory(Long id) {
+        return paraclinicalTestCategoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Paraclinical test category not found with id: " + id));
+    }
+
+    private Image findImage(Long id) {
+        return imageRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Image not found with id: " + id));
+    }
+
+    private boolean isValidImageKey(Long imageKey) {
+        return imageKey != null && imageKey != 0;
     }
 }
