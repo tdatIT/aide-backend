@@ -22,7 +22,12 @@ public class InitRoleData {
             var adminRole = new Role();
             adminRole.setRoleName(RoleEnum.ROLE_ADMIN.name());
 
+            var superAdminRole = new Role();
+            superAdminRole.setRoleName(RoleEnum.ROLE_SUPER_ADMIN.name());
+
             roleRepository.save(userRole);
+            roleRepository.save(adminRole);
+            roleRepository.save(superAdminRole);
         }
     }
 }

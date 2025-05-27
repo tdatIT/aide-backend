@@ -85,7 +85,13 @@ public class OAuth2ServiceImpl implements OAuth2Service {
             User user = userRepository.findByEmail(email).orElseGet(() -> createGoogleUser(email, googleId, name, avatar));
 
             // Generate JWT tokens
-            AuthUserDetails userDetails = new AuthUserDetails(user.getUsername(), null, user.isActive(), true, true, true);
+            AuthUserDetails userDetails = new AuthUserDetails(
+                    user.getUsername(),
+                    null, user.isActive(),
+                    true,
+                    true,
+                    true,
+                    user.getRoles());
 
             String jwtAccessToken = jwtService.generateToken(userDetails);
             String refreshToken = jwtService.generateRefreshToken(userDetails);
@@ -107,7 +113,14 @@ public class OAuth2ServiceImpl implements OAuth2Service {
 
         User user = userRepository.findByEmail(email).orElseGet(() -> createGoogleUser(email, googleId, (String) payload.get("name"), (String) payload.get("picture")));
 
-        AuthUserDetails userDetails = new AuthUserDetails(user.getEmail(), null, user.isActive(), true, true, true);
+        AuthUserDetails userDetails = new AuthUserDetails(
+                user.getEmail(),
+                null,
+                user.isActive(),
+                true,
+                true,
+                true,
+                user.getRoles());
 
         String accessToken = jwtService.generateToken(userDetails);
         String refreshToken = jwtService.generateRefreshToken(userDetails);

@@ -29,6 +29,13 @@ public class CustomUserDetailsService implements UserDetailsService {
             password = cred.get().getPassword();
         }
 
-        return new AuthUserDetails(user.getUsername(), password, user.isActive(), true, true, true);
+        return new AuthUserDetails(
+                user.getUsername(),
+                password,
+                user.isActive(),
+                true,
+                true,
+                true,
+                user.getRoles());
     }
 }

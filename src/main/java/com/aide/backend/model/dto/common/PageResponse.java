@@ -12,6 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 public class PageResponse<T> {
     private List<T> items;
+    private int page;
     private int size;
     private long total;
     private boolean hasMore;
@@ -19,9 +20,10 @@ public class PageResponse<T> {
     public static <T> PageResponse<T> of(Page<T> page) {
         return new PageResponse<>(
             page.getContent(),
+            page.getNumber(),
             page.getSize(),
             page.getTotalElements(),
-            !page.isLast()
+            page.hasNext()
         );
     }
 } 

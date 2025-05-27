@@ -6,7 +6,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.stream.Collectors;
 
 @Getter
 public class AuthUserDetails implements UserDetails {
@@ -24,7 +24,8 @@ public class AuthUserDetails implements UserDetails {
             boolean enabled,
             boolean accountNonExpired,
             boolean credentialsNonExpired,
-            boolean accountNonLocked
+            boolean accountNonLocked,
+            Collection<Role> roles
     ) {
         this.username = username;
         this.password = password;
@@ -32,7 +33,10 @@ public class AuthUserDetails implements UserDetails {
         this.accountNonExpired = accountNonExpired;
         this.credentialsNonExpired = credentialsNonExpired;
         this.accountNonLocked = accountNonLocked;
-        this.authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
+        // Convert roles to Spring Security authorities
+        this.authorities = roles.stream()
+                .map(role -> new SimpleGrantedAuthority(role.getRoleName()))
+                .collect(Collectors.toList());
     }
 
     @Override

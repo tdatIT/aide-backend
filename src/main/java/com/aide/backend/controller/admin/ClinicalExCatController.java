@@ -1,4 +1,4 @@
-package com.aide.backend.controller;
+package com.aide.backend.controller.admin;
 
 import com.aide.backend.common.BaseResponse;
 import com.aide.backend.model.dto.patients.ClinicalExamCategoryDTO;
@@ -12,13 +12,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/clinical-exam-categories")
+@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+@RequestMapping("/api/v1/admin/clinical-ex-cats")
 @RequiredArgsConstructor
 @Tag(name = "Clinical Exam Categories", description = "Clinical exam category management endpoints")
-public class ClinicalExamCategoryController {
+public class ClinicalExCatController {
 
     private final ClinicalExamCategoryService service;
 

@@ -4,7 +4,6 @@ import com.aide.backend.exception.ResourceNotFoundException;
 import com.aide.backend.model.dto.patients.*;
 import com.aide.backend.model.dto.common.PageResponse;
 import com.aide.backend.model.entity.patients.*;
-import com.aide.backend.model.enums.Gender;
 import com.aide.backend.repository.*;
 import com.aide.backend.service.PatientCaseService;
 import lombok.RequiredArgsConstructor;
@@ -64,7 +63,7 @@ public class PatientCaseServiceImpl implements PatientCaseService {
 
     @Override
     public PageResponse<PatientCaseDTO> findAll(Pageable pageable) {
-        Page<Patient> page = repository.findByStatus(1, pageable);
+        Page<Patient> page = repository.findAll(pageable);
         return PageResponse.of(page.map(this::mapToDTO));
     }
 

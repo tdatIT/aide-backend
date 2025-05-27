@@ -1,4 +1,4 @@
-package com.aide.backend.controller;
+package com.aide.backend.controller.admin;
 
 import com.aide.backend.common.BaseResponse;
 import com.aide.backend.model.dto.patients.ParaclinicalTestCategoryDTO;
@@ -12,13 +12,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/paraclinical-test-categories")
+@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+@RequestMapping("/api/v1/admin/paraclinical-test-cats")
 @RequiredArgsConstructor
 @Tag(name = "Paraclinical Test Categories", description = "Paraclinical test category management endpoints")
-public class ParaclinicalTestCategoryController {
+public class ParaclinicalTestCatController {
 
     private final ParaclinicalTestCategoryService service;
 

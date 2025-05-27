@@ -1,4 +1,4 @@
-package com.aide.backend.controller;
+package com.aide.backend.controller.auth;
 
 import com.aide.backend.common.BaseResponse;
 import com.aide.backend.model.dto.auth.*;

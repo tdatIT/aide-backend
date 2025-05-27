@@ -1,7 +1,8 @@
-package com.aide.backend.controller;
+package com.aide.backend.controller.admin;
 
 import com.aide.backend.model.entity.patients.Image;
 import com.aide.backend.service.UploadService;
+import com.aide.backend.model.dto.common.BaseResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -12,7 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@RequestMapping("/api/v1/uploads")
+@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+@RequestMapping("/api/v1/admin/uploads")
 @RequiredArgsConstructor
 public class UploadController {
 
@@ -21,7 +23,7 @@ public class UploadController {
 
     @PostMapping("/images")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Image> uploadImage(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<BaseResponse<Image>> uploadImage(@RequestParam("file") MultipartFile file) {
         if (file.isEmpty()) {
             throw new IllegalArgumentException("File is empty");
         }
@@ -36,6 +38,6 @@ public class UploadController {
         }
 
         Image uploadedImage = uploadService.uploadImage(file);
-        return ResponseEntity.ok(uploadedImage);
+        return ResponseEntity.ok(BaseResponse.success("Image uploaded successfully", uploadedImage));
     }
 }

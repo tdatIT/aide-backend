@@ -68,8 +68,6 @@ public class ClinicalExamCategoryServiceImpl implements ClinicalExamCategoryServ
         dto.setId(category.getId());
         dto.setName(category.getName());
         dto.setDescription(category.getDescription());
-        dto.setCreatedAt(category.getCreatedAt());
-        dto.setUpdatedAt(category.getUpdatedAt());
         return dto;
     }
 }

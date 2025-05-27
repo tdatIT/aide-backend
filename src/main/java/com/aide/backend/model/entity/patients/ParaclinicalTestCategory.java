@@ -5,8 +5,10 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Entity
-@Table(name = "clinical_exam_categories")
+@Table(name = "paraclinical_test_categories")
 @Getter
 @Setter
 public class ParaclinicalTestCategory extends BaseEntity {
@@ -14,9 +16,11 @@ public class ParaclinicalTestCategory extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name", length = 200, nullable = false, unique = true)
+    @Column(name = "name", length = 200, nullable = false)
     private String name;
 
     @Column(name = "description", columnDefinition = "text")
     private String description;
+
+    private LocalDateTime deletedAt;
 }
