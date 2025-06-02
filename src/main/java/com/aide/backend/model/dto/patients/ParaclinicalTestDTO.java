@@ -7,6 +7,5 @@ public class ParaclinicalTestDTO {
     private Long id;
     private String name;
     private String notes;
-    private String result;
     private String[] imageUrls;
 }

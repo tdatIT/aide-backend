@@ -248,6 +248,7 @@ public class PatientCaseServiceImpl implements PatientCaseService {
                 .id(patient.getId())
                 .name(patient.getName())
                 .gender(patient.getGender().toString())
+                .reasonForVisit(patient.getReasonForVisit())
                 .age(patient.getAge())
                 .status(patient.getStatus())
                 .occupation(patient.getOccupation())
