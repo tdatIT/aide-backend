@@ -17,7 +17,6 @@ import java.util.Set;
 @Table(name = "patients")
 @Getter
 @Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Patient extends BaseEntity {
@@ -27,6 +26,9 @@ public class Patient extends BaseEntity {
 
     @Column(length = 150)
     private String name;
+
+    @Column(columnDefinition = "text")
+    private String reasonForVisit;
 
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
@@ -48,7 +50,6 @@ public class Patient extends BaseEntity {
     @JdbcTypeCode(SqlTypes.ARRAY)
     private String[] suggestedTests;
 
-    @Column()
     private Long requestCounter=0L;
 
     @Column(nullable = false, length = 50)

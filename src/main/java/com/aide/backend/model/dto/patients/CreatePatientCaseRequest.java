@@ -22,8 +22,10 @@ public class CreatePatientCaseRequest {
     @NotEmpty
     private Integer age;
 
-    @NotBlank
     private String occupation;
+
+    @NotBlank
+    private String reasonForVisit;
 
     @NotBlank
     private String medicalHistory;
@@ -33,9 +35,6 @@ public class CreatePatientCaseRequest {
 
     @NotEmpty
     private String[] suggestedTests;
-
-    @NotNull
-    private Long requestCounter;
 
     @NotEmpty
     private List<CreateTestResultItems> clinicalExams;

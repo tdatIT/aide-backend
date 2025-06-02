@@ -15,8 +15,5 @@ public abstract class Result extends BaseEntity {
     private Long id;
 
     @Column(columnDefinition = "text")
-    private String result;
-
-    @Column(columnDefinition = "text")
     private String notes;
 }

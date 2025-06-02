@@ -14,14 +14,11 @@ public class Diagnosis extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "diagnosis_name", length = 255)
+    @Column(name = "diagnosis_name")
     private String diagnosisName;
 
     @Column(columnDefinition = "text")
     private String description;
-
-    @Column(columnDefinition = "text")
-    private String notes;
 
     @OneToOne(mappedBy = "diagnosis")
     private Patient patient;

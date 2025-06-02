@@ -8,5 +8,5 @@ public class ParaclinicalTestDTO {
     private String name;
     private String notes;
     private String result;
-    private String imageUrl;
+    private String[] imageUrls;
 }

@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.aide.backend.model.enums.PatientStatus.UNPUBLISHED;
@@ -32,17 +33,16 @@ public class PatientCaseServiceImpl implements PatientCaseService {
     @Override
     @Transactional
     public PatientCaseDTO create(CreatePatientCaseRequest request) {
-        Patient patient = Patient.builder()
-                .name(request.getName())
-                .gender(request.getGender())
-                .age(request.getAge())
-                .occupation(request.getOccupation())
-                .medicalHistory(request.getMedicalHistory())
-                .dentalHistory(request.getDentalHistory())
-                .suggestedTests(request.getSuggestedTests())
-                .requestCounter(request.getRequestCounter())
-                .status(UNPUBLISHED.toString())
-                .build();
+        Patient patient = new Patient();
+        patient.setStatus(UNPUBLISHED.toString());
+        patient.setGender(request.getGender());
+        patient.setName(request.getName());
+        patient.setAge(request.getAge());
+        patient.setReasonForVisit(request.getReasonForVisit());
+        patient.setOccupation(request.getOccupation());
+        patient.setMedicalHistory(request.getMedicalHistory());
+        patient.setDentalHistory(request.getDentalHistory());
+        patient.setSuggestedTests(request.getSuggestedTests());
 
         handleClinicalExams(patient, request.getClinicalExams());
         handleParaclinicalTests(patient, request.getParaclinicalTests());
@@ -87,11 +87,11 @@ public class PatientCaseServiceImpl implements PatientCaseService {
         patient.setName(request.getName());
         patient.setGender(request.getGender());
         patient.setAge(request.getAge());
+        patient.setReasonForVisit(request.getReasonForVisit());
         patient.setOccupation(request.getOccupation());
         patient.setMedicalHistory(request.getMedicalHistory());
         patient.setDentalHistory(request.getDentalHistory());
         patient.setSuggestedTests(request.getSuggestedTests());
-        patient.setRequestCounter(request.getRequestCounter());
     }
 
     private void handleClinicalExams(Patient patient, List<CreateTestResultItems> clinicalExams) {
@@ -129,11 +129,16 @@ public class PatientCaseServiceImpl implements PatientCaseService {
                             .patient(patient)
                             .clinicalExamCategories(findClinicalExamCategory(item.getTestCategoryId()))
                             .build();
-                    result.setResult(item.getResult());
                     result.setNotes(item.getNotes());
 
-                    if (isValidImageKey(item.getImageKey())) {
-                        result.setImage(findImage(item.getImageKey()));
+                    if (item.getImageKeys() != null && item.getImageKeys().length > 0) {
+                        Set<Image> images = new HashSet<>();
+                        for (Long imageKey : item.getImageKeys()) {
+                            if (isValidImageKey(imageKey)) {
+                                images.add(findImage(imageKey));
+                            }
+                        }
+                        result.setImages(images);
                     }
                     return result;
                 })
@@ -151,11 +156,16 @@ public class PatientCaseServiceImpl implements PatientCaseService {
                             .patient(patient)
                             .paraclinicalTestCategory(findParaclinicalTestCategory(item.getTestCategoryId()))
                             .build();
-                    result.setResult(item.getResult());
                     result.setNotes(item.getNotes());
 
-                    if (isValidImageKey(item.getImageKey())) {
-                        result.setImage(findImage(item.getImageKey()));
+                    if (item.getImageKeys() != null && item.getImageKeys().length > 0) {
+                        Set<Image> images = new HashSet<>();
+                        for (Long imageKey : item.getImageKeys()) {
+                            if (isValidImageKey(imageKey)) {
+                                images.add(findImage(imageKey));
+                            }
+                        }
+                        result.setImages(images);
                     }
                     return result;
                 })
@@ -171,7 +181,6 @@ public class PatientCaseServiceImpl implements PatientCaseService {
         diagnosis.setPatient(patient);
         diagnosis.setDiagnosisName(diagnosisDTO.getDiagnosisName());
         diagnosis.setDescription(diagnosisDTO.getDescription());
-        diagnosis.setNotes(diagnosisDTO.getNotes());
         return diagnosis;
     }
 
@@ -183,7 +192,6 @@ public class PatientCaseServiceImpl implements PatientCaseService {
         }
         diagnosis.setDiagnosisName(diagnosisDTO.getDiagnosisName());
         diagnosis.setDescription(diagnosisDTO.getDescription());
-        diagnosis.setNotes(diagnosisDTO.getNotes());
         return diagnosis;
     }
 
@@ -269,9 +277,10 @@ public class PatientCaseServiceImpl implements PatientCaseService {
         dto.setId(result.getId());
         dto.setName(result.getClinicalExamCategories().getName());
         dto.setNotes(result.getNotes());
-        dto.setResult(result.getResult());
-        if (result.getImage() != null) {
-            dto.setImageUrl(result.getImage().getUrl());
+        if (result.getImages() != null && !result.getImages().isEmpty()) {
+            dto.setImageUrls(result.getImages().stream()
+                    .map(Image::getUrl)
+                    .toArray(String[]::new));
         }
         return dto;
     }
@@ -281,9 +290,10 @@ public class PatientCaseServiceImpl implements PatientCaseService {
         dto.setId(result.getId());
         dto.setName(result.getParaclinicalTestCategory().getName());
         dto.setNotes(result.getNotes());
-        dto.setResult(result.getResult());
-        if (result.getImage() != null) {
-            dto.setImageUrl(result.getImage().getUrl());
+        if (result.getImages() != null && !result.getImages().isEmpty()) {
+            dto.setImageUrls(result.getImages().stream()
+                    .map(Image::getUrl)
+                    .toArray(String[]::new));
         }
         return dto;
     }
@@ -294,7 +304,6 @@ public class PatientCaseServiceImpl implements PatientCaseService {
         dto.setId(diagnosis.getId());
         dto.setDiagnosisName(diagnosis.getDiagnosisName());
         dto.setDescription(diagnosis.getDescription());
-        dto.setNotes(diagnosis.getNotes());
         return dto;
     }
 
