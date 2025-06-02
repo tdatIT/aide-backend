@@ -58,6 +58,7 @@ public class PatientCaseServiceImpl implements PatientCaseService {
         Patient patient = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Patient case not found with id: " + id));
 
+        // Update basic patient info
         updateBasicPatientInfo(patient, request);
 
         // Update clinical exams
@@ -67,17 +68,33 @@ public class PatientCaseServiceImpl implements PatientCaseService {
 
         // Update paraclinical tests
         if (request.getParaclinicalTests() != null) {
-            patient.setParaclinicalExamResults(new HashSet<>(updateParaclinicalTests(patient, request.getParaclinicalTests())));
+            // Clear existing paraclinical exam results
+            patient.getParaclinicalExamResults().clear();
+            // Add new paraclinical exam results
+            patient.getParaclinicalExamResults().addAll(createParaclinicalTests(patient, request.getParaclinicalTests()));
         }
 
         // Update diagnosis
         if (request.getDiagnosis() != null) {
-            patient.setDiagnosis(updateDiagnosis(patient, request.getDiagnosis()));
+            Diagnosis diagnosis = patient.getDiagnosis();
+            if (diagnosis == null) {
+                diagnosis = new Diagnosis();
+                diagnosis.setPatient(patient);
+                patient.setDiagnosis(diagnosis);
+            }
+            diagnosis.setDiagnosisName(request.getDiagnosis().getDiagnosisName());
+            diagnosis.setDescription(request.getDiagnosis().getDescription());
         }
 
         // Update treatment
         if (request.getTreatment() != null) {
-            patient.setTreatment(updateTreatment(patient, request.getTreatment()));
+            Treatment treatment = patient.getTreatment();
+            if (treatment == null) {
+                treatment = new Treatment();
+                treatment.setPatient(patient);
+                patient.setTreatment(treatment);
+            }
+            treatment.setDescription(request.getTreatment().getDescription());
         }
 
         return mapToDTO(repository.save(patient));
