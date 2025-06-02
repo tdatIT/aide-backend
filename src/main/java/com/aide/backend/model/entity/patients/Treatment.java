@@ -17,9 +17,6 @@ public class Treatment extends BaseEntity {
     @Column(columnDefinition = "text")
     private String description;
 
-    @Column(columnDefinition = "text")
-    private String notes;
-
     @OneToOne(mappedBy = "treatment")
     private Patient patient;
 }

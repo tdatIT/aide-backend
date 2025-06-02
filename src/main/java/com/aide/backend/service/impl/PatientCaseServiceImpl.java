@@ -199,7 +199,6 @@ public class PatientCaseServiceImpl implements PatientCaseService {
         Treatment treatment = new Treatment();
         treatment.setPatient(patient);
         treatment.setDescription(treatmentDTO.getDescription());
-        treatment.setNotes(treatmentDTO.getNotes());
         return treatment;
     }
 
@@ -210,7 +209,6 @@ public class PatientCaseServiceImpl implements PatientCaseService {
             treatment.setPatient(patient);
         }
         treatment.setDescription(treatmentDTO.getDescription());
-        treatment.setNotes(treatmentDTO.getNotes());
         return treatment;
     }
 
@@ -312,7 +310,6 @@ public class PatientCaseServiceImpl implements PatientCaseService {
         TreatmentDTO dto = new TreatmentDTO();
         dto.setId(treatment.getId());
         dto.setDescription(treatment.getDescription());
-        dto.setNotes(treatment.getNotes());
         return dto;
     }
 

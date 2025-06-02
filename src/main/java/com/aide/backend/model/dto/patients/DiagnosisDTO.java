@@ -7,5 +7,4 @@ public class DiagnosisDTO {
     private Long id;
     private String diagnosisName;
     private String description;
-    private String notes;
 }
