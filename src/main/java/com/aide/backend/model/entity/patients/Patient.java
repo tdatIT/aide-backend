@@ -46,6 +46,9 @@ public class Patient extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String dentalHistory;
 
+    @Column(columnDefinition = "TEXT")
+    private String clinicalHistory;
+
     @Column(columnDefinition = "text[]")
     @JdbcTypeCode(SqlTypes.ARRAY)
     private String[] suggestedTests;

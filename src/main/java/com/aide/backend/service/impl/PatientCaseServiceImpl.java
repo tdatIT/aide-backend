@@ -43,6 +43,7 @@ public class PatientCaseServiceImpl implements PatientCaseService {
         patient.setMedicalHistory(request.getMedicalHistory());
         patient.setDentalHistory(request.getDentalHistory());
         patient.setSuggestedTests(request.getSuggestedTests());
+        patient.setClinicalHistory(request.getClinicalHistory());
 
         handleClinicalExams(patient, request.getClinicalExams());
         handleParaclinicalTests(patient, request.getParaclinicalTests());
@@ -272,6 +273,7 @@ public class PatientCaseServiceImpl implements PatientCaseService {
                 .medicalHistory(patient.getMedicalHistory())
                 .dentalHistory(patient.getDentalHistory())
                 .suggestedTests(patient.getSuggestedTests())
+                .clinicalHistory(patient.getClinicalHistory())
                 .requestCounter(patient.getRequestCounter())
                 .clinicalExams(patient.getClinicalExamResults().stream()
                         .map(this::mapToClinicalExamDTO)

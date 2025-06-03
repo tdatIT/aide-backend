@@ -33,6 +33,8 @@ public class CreatePatientCaseRequest {
     @NotBlank
     private String dentalHistory;
 
+    private String clinicalHistory;
+
     @NotEmpty
     private String[] suggestedTests;
 

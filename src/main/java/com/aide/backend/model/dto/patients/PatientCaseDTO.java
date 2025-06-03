@@ -15,6 +15,7 @@ public class PatientCaseDTO {
     private Integer age;
     private String occupation;
     private String reasonForVisit;
+    private String clinicalHistory;
     private String medicalHistory;
     private String dentalHistory;
     private String[] suggestedTests;
