@@ -14,6 +14,9 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ParaclinicalExamResult extends Result {
+
+    private String textResult;
+
     @ManyToOne
     @JoinColumn(name = "paraclinical_test_cate_id", nullable = false)
     private ParaclinicalTestCategory paraclinicalTestCategory;
@@ -21,6 +24,7 @@ public class ParaclinicalExamResult extends Result {
     @ManyToOne
     @JoinColumn(name = "patient_id", nullable = false)
     private Patient patient;
+
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(

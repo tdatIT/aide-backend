@@ -14,6 +14,8 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ClinicalExamResult extends Result {
+    private String textResult;
+
     @ManyToOne
     @JoinColumn(name = "clinical_exam_cate_id", nullable = false)
     private ClinicalExamCategory clinicalExamCategories;

@@ -5,7 +5,8 @@ import lombok.Data;
 @Data
 public class ParaclinicalTestDTO {
     private Long id;
-    private String name;
+    private String testName;
+    private String textResult;
     private String notes;
     private String[] imageUrls;
 }

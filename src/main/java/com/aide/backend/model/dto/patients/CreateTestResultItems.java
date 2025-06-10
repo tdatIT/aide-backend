@@ -7,6 +7,7 @@ import lombok.Data;
 @Builder
 public class CreateTestResultItems {
     private Long testCategoryId;
+    private String textResult;
     private String notes;
     private Long[] imageKeys;
 }

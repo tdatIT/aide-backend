@@ -148,6 +148,7 @@ public class PatientCaseServiceImpl implements PatientCaseService {
                             .clinicalExamCategories(findClinicalExamCategory(item.getTestCategoryId()))
                             .build();
                     result.setNotes(item.getNotes());
+                    result.setTextResult(item.getTextResult());
 
                     if (item.getImageKeys() != null && item.getImageKeys().length > 0) {
                         Set<Image> images = new HashSet<>();
@@ -175,6 +176,7 @@ public class PatientCaseServiceImpl implements PatientCaseService {
                             .paraclinicalTestCategory(findParaclinicalTestCategory(item.getTestCategoryId()))
                             .build();
                     result.setNotes(item.getNotes());
+                    result.setTextResult(item.getTextResult());
 
                     if (item.getImageKeys() != null && item.getImageKeys().length > 0) {
                         Set<Image> images = new HashSet<>();
@@ -293,7 +295,8 @@ public class PatientCaseServiceImpl implements PatientCaseService {
     private ClinicalExamDTO mapToClinicalExamDTO(ClinicalExamResult result) {
         ClinicalExamDTO dto = new ClinicalExamDTO();
         dto.setId(result.getId());
-        dto.setName(result.getClinicalExamCategories().getName());
+        dto.setTestName(result.getClinicalExamCategories().getName());
+        dto.setTextResult(result.getTextResult());
         dto.setNotes(result.getNotes());
         if (result.getImages() != null && !result.getImages().isEmpty()) {
             dto.setImageUrls(result.getImages().stream()
@@ -306,7 +309,8 @@ public class PatientCaseServiceImpl implements PatientCaseService {
     private ParaclinicalTestDTO mapToParaclinicalTestDTO(ParaclinicalExamResult result) {
         ParaclinicalTestDTO dto = new ParaclinicalTestDTO();
         dto.setId(result.getId());
-        dto.setName(result.getParaclinicalTestCategory().getName());
+        dto.setTextResult(result.getTextResult());
+        dto.setTestName(result.getParaclinicalTestCategory().getName());
         dto.setNotes(result.getNotes());
         if (result.getImages() != null && !result.getImages().isEmpty()) {
             dto.setImageUrls(result.getImages().stream()
