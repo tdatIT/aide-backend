@@ -58,6 +58,10 @@ public class Patient extends BaseEntity {
     @Column(nullable = false, length = 50)
     private String status = PatientStatus.UNPUBLISHED.toString();
 
+    private String chatModelId;
+
+    private String feedbackModelId;
+
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "patient_id")
     private Set<ClinicalExamResult> clinicalExamResults = new HashSet<>();

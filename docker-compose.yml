@@ -1,23 +1,62 @@
 services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
+  postgres:
+    image: postgres:16
+    container_name: postgres_prod
+    restart: always
     environment:
-      - SPRING_PROFILES_ACTIVE=dev
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-    depends_on:
-      - redis
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: aide_db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - backend-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U myuser"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '1.00'
+          memory: 512M
+
   redis:
-    image: redis:7-alpine
+    image: redis:7
+    container_name: redis_prod
+    restart: always
+    command: >
+      redis-server
+      --appendonly yes
+      --save 900 1
+      --save 300 10
+      --save 60 10000
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+    volumes:
+      - redisdata:/data
     ports:
       - "6379:6379"
-    volumes:
-      - redis_data:/data
-    command: redis-server --save 20 1 --loglevel warning
+    networks:
+      - backend-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 256M
 
 volumes:
-  redis_data:
+  pgdata:
+  redisdata:
+
+networks:
+  backend-net:
+    driver: bridge
