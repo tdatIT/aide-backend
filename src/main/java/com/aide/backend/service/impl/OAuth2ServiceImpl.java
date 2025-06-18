@@ -108,7 +108,7 @@ public class OAuth2ServiceImpl implements OAuth2Service {
                 .active(true)
                 .build();
         user.setCredentials(Set.of(googleCred));
-        user.getRoles().add(userRole);
+        user.setRoles(Set.of(userRole));
         return userRepository.save(user);
     }
 }

@@ -25,8 +25,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import static com.aide.backend.config.Constants.*;
 import static com.aide.backend.config.OpenAIClient.PATIENT_ASSISTANT_PROMPT_ID;
@@ -99,7 +101,7 @@ public class ExamServiceImpl implements ExamService {
                 .sender(SenderType.AI)
                 .session(newSess)
                 .build();
-        newSess.getChatMessages().add(message);
+        newSess.setChatMessages(List.of(message));
         newSess.setUser(user);
         newSess.setLastedMessageId(response.id());
         newSess = examSessRepository.save(newSess);
@@ -174,12 +176,12 @@ public class ExamServiceImpl implements ExamService {
         var text = extractResponseText(response);
 
         //user chat msg
-        var useMsg = ChatMessage.builder()
+        var usrMsg = ChatMessage.builder()
                 .message(req.getMessage())
                 .sender(SenderType.USER)
                 .session(session)
                 .build();
-        useMsg.setSession(session);
+        usrMsg.setSession(session);
 
         //ai chat msg
         var aiMsg = ChatMessage.builder()
@@ -190,7 +192,7 @@ public class ExamServiceImpl implements ExamService {
                 .build();
         aiMsg.setSession(session);
 
-        session.getChatMessages().add(useMsg);
+        session.getChatMessages().add(usrMsg);
         session.getChatMessages().add(aiMsg);
         examSessRepository.save(session);
 

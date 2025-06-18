@@ -66,7 +66,7 @@ public class AuthServiceImpl implements AuthService {
         passwordCred.setPassword(passwordEncoder.encode(request.getPassword()));
         passwordCred.setActive(true);
         passwordCred.setUser(user);
-        user.getCredentials().add(passwordCred);
+        user.setCredentials(Set.of(passwordCred));
 
         userRepository.save(user);
     }
