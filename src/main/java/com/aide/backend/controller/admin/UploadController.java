@@ -1,8 +1,9 @@
 package com.aide.backend.controller.admin;
 
-import com.aide.backend.model.dto.patients.ImageUploadResponse;
+import com.aide.backend.domain.dto.common.BaseResponse;
+import com.aide.backend.domain.dto.patients.ImageUploadResponse;
+import com.aide.backend.exception.BusinessException;
 import com.aide.backend.service.UploadService;
-import com.aide.backend.model.dto.common.BaseResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,21 +28,21 @@ public class UploadController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BaseResponse<List<ImageUploadResponse>>> uploadImages(@RequestParam("files") List<MultipartFile> files) {
         if (files == null || files.isEmpty()) {
-            throw new IllegalArgumentException("No files provided");
+            throw new BusinessException("No files provided");
         }
 
         for (MultipartFile file : files) {
             if (file.isEmpty()) {
-                throw new IllegalArgumentException("File is empty");
+                throw new BusinessException("File is empty");
             }
 
             if (file.getSize() > MAX_FILE_SIZE) {
-                throw new IllegalArgumentException("File size exceeds 5MB limit");
+                throw new BusinessException("File size exceeds 5MB limit");
             }
 
             String contentType = file.getContentType();
             if (contentType == null || !contentType.startsWith("image/")) {
-                throw new IllegalArgumentException("File must be an image");
+                throw new BusinessException("File must be an image");
             }
         }
 

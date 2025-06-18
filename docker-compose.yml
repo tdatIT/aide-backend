@@ -53,28 +53,28 @@ services:
           cpus: '0.50'
           memory: 256M
 
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: springboot_app
-    restart: always
-    environment:
-      - SPRING_PROFILES_ACTIVE=dev
-    ports:
-      - "8080:8080"
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - backend-net
-    deploy:
-      resources:
-        limits:
-          cpus: '1.00'
-          memory: 1G
+#  app:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    container_name: springboot_app
+#    restart: always
+#    environment:
+#      - SPRING_PROFILES_ACTIVE=dev
+#    ports:
+#      - "8080:8080"
+#    depends_on:
+#      postgres:
+#        condition: service_healthy
+#      redis:
+#        condition: service_healthy
+#    networks:
+#      - backend-net
+#    deploy:
+#      resources:
+#        limits:
+#          cpus: '1.00'
+#          memory: 1G
 
 volumes:
   pgdata:

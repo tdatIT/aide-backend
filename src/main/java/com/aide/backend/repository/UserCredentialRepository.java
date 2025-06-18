@@ -1,7 +1,7 @@
 package com.aide.backend.repository;
 
-import com.aide.backend.model.entity.user.UserCredential;
-import com.aide.backend.model.enums.CredentialType;
+import com.aide.backend.domain.entity.user.UserCredential;
+import com.aide.backend.domain.enums.CredentialType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

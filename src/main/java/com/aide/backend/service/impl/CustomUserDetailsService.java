@@ -1,7 +1,7 @@
 package com.aide.backend.service.impl;
 
-import com.aide.backend.model.entity.user.AuthUserDetails;
-import com.aide.backend.model.enums.CredentialType;
+import com.aide.backend.domain.entity.user.AuthUserDetails;
+import com.aide.backend.domain.enums.CredentialType;
 import com.aide.backend.repository.UserCredentialRepository;
 import com.aide.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,21 +21,21 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        var user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
-        var cred = userCredentialRepository.findByUsernameAndCredType(username, CredentialType.PASSWORD);
+        var user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+        var cred = userCredentialRepository.findByUsernameAndCredType(username, CredentialType.PASSWORD).orElseThrow(
+                () -> new UsernameNotFoundException("Credential not found for user: " + username));
 
-        String password = "";
-        if (cred.isPresent()) {
-            password = cred.get().getPassword();
-        }
 
         return new AuthUserDetails(
+                user.getId(),
                 user.getUsername(),
-                password,
+                cred.getPassword(),
                 user.isActive(),
                 true,
                 true,
                 true,
-                user.getRoles());
+                user.getRoles()
+        );
     }
 }

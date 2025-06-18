@@ -1,14 +1,12 @@
 package com.aide.backend.service.impl;
 
+import com.aide.backend.domain.dto.auth.*;
+import com.aide.backend.domain.entity.user.Role;
+import com.aide.backend.domain.entity.user.User;
+import com.aide.backend.domain.entity.user.UserCredential;
+import com.aide.backend.domain.enums.CredentialType;
+import com.aide.backend.domain.enums.RoleEnum;
 import com.aide.backend.exception.BusinessException;
-import com.aide.backend.model.dto.auth.LoginRequest;
-import com.aide.backend.model.dto.auth.RegisterRequest;
-import com.aide.backend.model.dto.auth.TokenResponse;
-import com.aide.backend.model.entity.user.Role;
-import com.aide.backend.model.entity.user.User;
-import com.aide.backend.model.entity.user.UserCredential;
-import com.aide.backend.model.enums.CredentialType;
-import com.aide.backend.model.enums.RoleEnum;
 import com.aide.backend.repository.RoleRepository;
 import com.aide.backend.repository.UserCredentialRepository;
 import com.aide.backend.repository.UserRepository;
@@ -28,6 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+
+import static com.aide.backend.config.Constants.MAX_ACCESS_TOKEN_EXP;
 
 @Slf4j
 @Service
@@ -71,20 +71,30 @@ public class AuthServiceImpl implements AuthService {
         userRepository.save(user);
     }
 
-    public TokenResponse login(LoginRequest request) {
+    public LoginResponse login(LoginRequest request) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
         );
+
+        var user = userRepository.findByUsername(request.getUsername())
+                .orElseThrow(() -> new BusinessException("User not found"));
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         String accessToken = jwtService.generateToken(userDetails);
         String refreshToken = jwtService.generateRefreshToken(userDetails);
 
-        return TokenResponse.builder()
+        return LoginResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
-                .tokenType("Bearer")
-                .expiresIn(24 * 60 * 60) // 24 hours in seconds
+                .expiresIn(MAX_ACCESS_TOKEN_EXP)
+                .profile(
+                        UserProfileDTO.builder()
+                                .id(user.getId())
+                                .username(user.getUsername())
+                                .fullName(user.getFullName())
+                                .roles(user.getRoles().stream().map(Role::getRoleName).distinct().toArray(String[]::new))
+                                .build()
+                )
                 .build();
     }
 
@@ -117,7 +127,6 @@ public class AuthServiceImpl implements AuthService {
         return TokenResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
-                .tokenType("Bearer")
                 .expiresIn(24 * 60 * 60)
                 .build();
     }

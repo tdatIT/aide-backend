@@ -1,9 +1,9 @@
 package com.aide.backend.controller.admin;
 
 import com.aide.backend.common.BaseResponse;
-import com.aide.backend.model.dto.patients.ParaclinicalTestCategoryDTO;
-import com.aide.backend.service.ParaclinicalTestCategoryService;
-import com.aide.backend.model.dto.common.PageResponse;
+import com.aide.backend.domain.dto.common.PageResponse;
+import com.aide.backend.domain.dto.patients.ParaclinicalCateDTO;
+import com.aide.backend.service.ParaclinicalCateService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,20 +22,22 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Paraclinical Test Categories", description = "Paraclinical test category management endpoints")
 public class ParaclinicalTestCatController {
 
-    private final ParaclinicalTestCategoryService service;
+    private final ParaclinicalCateService service;
 
     @PostMapping
     @Operation(summary = "Create a new paraclinical test category")
-    public ResponseEntity<BaseResponse<ParaclinicalTestCategoryDTO>> create(@Valid @RequestBody ParaclinicalTestCategoryDTO dto) {
-        return ResponseEntity.ok(BaseResponse.success(service.create(dto)));
+    public ResponseEntity<BaseResponse<ParaclinicalCateDTO>> create(@Valid @RequestBody ParaclinicalCateDTO dto) {
+        service.create(dto);
+        return ResponseEntity.ok(BaseResponse.success("success", null));
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Update a paraclinical test category")
-    public ResponseEntity<BaseResponse<ParaclinicalTestCategoryDTO>> update(
+    public ResponseEntity<BaseResponse<ParaclinicalCateDTO>> update(
             @PathVariable Long id,
-            @Valid @RequestBody ParaclinicalTestCategoryDTO dto) {
-        return ResponseEntity.ok(BaseResponse.success(service.update(id, dto)));
+            @Valid @RequestBody ParaclinicalCateDTO dto) {
+        service.update(id, dto);
+        return ResponseEntity.ok(BaseResponse.success("success", null));
     }
 
     @DeleteMapping("/{id}")
@@ -47,13 +49,13 @@ public class ParaclinicalTestCatController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Get a paraclinical test category by ID")
-    public ResponseEntity<BaseResponse<ParaclinicalTestCategoryDTO>> findById(@PathVariable Long id) {
+    public ResponseEntity<BaseResponse<ParaclinicalCateDTO>> findById(@PathVariable Long id) {
         return ResponseEntity.ok(BaseResponse.success(service.findById(id)));
     }
 
     @GetMapping
     @Operation(summary = "Get all paraclinical test categories with pagination")
-    public ResponseEntity<BaseResponse<PageResponse<ParaclinicalTestCategoryDTO>>> findAll(
+    public ResponseEntity<BaseResponse<PageResponse<ParaclinicalCateDTO>>> findAll(
             @Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Page size") @RequestParam(defaultValue = "10") int size) {
 

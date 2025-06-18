@@ -1,9 +1,9 @@
 package com.aide.backend.service;
 
-import com.aide.backend.model.dto.iam.CreateRoleRequest;
-import com.aide.backend.model.dto.iam.RoleDTO;
-import com.aide.backend.model.dto.iam.UserDTO;
-import com.aide.backend.model.dto.common.PageResponse;
+import com.aide.backend.domain.dto.common.PageResponse;
+import com.aide.backend.domain.dto.iam.CreateRoleRequest;
+import com.aide.backend.domain.dto.iam.RoleDTO;
+import com.aide.backend.domain.dto.iam.UserDTO;
 import org.springframework.data.domain.Pageable;
 
 public interface IAMService {
@@ -14,4 +14,4 @@ public interface IAMService {
     void deleteRole(Long roleId);
     UserDTO addRoleToUser(Long userId, Long roleId);
     UserDTO removeRoleFromUser(Long userId, Long roleId);
-} 
+}

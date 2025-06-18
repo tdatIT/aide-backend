@@ -1,8 +1,9 @@
 package com.aide.backend.repository;
 
-import com.aide.backend.model.entity.user.OTP;
+import com.aide.backend.domain.entity.user.OTP;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
 import java.util.Optional;
 
 @Repository

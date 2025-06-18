@@ -25,7 +25,7 @@ public class GlobalExceptionHandler {
         log.error("Business error occurred: {}", ex.getMessage());
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(BaseResponse.error(ex.getMessage(), null));
+                .body(BaseResponse.error(ex.getMessage()));
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
@@ -33,7 +33,7 @@ public class GlobalExceptionHandler {
         log.error("Resource not found: {}", ex.getMessage());
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
-                .body(BaseResponse.error(ex.getMessage(), null));
+                .body(BaseResponse.error(ex.getMessage()));
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
@@ -41,7 +41,7 @@ public class GlobalExceptionHandler {
         log.error("Resource not found: {}", ex.getMessage());
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
-                .body(BaseResponse.error("Resource not found", null));
+                .body(BaseResponse.error("Resource not found"));
     }
 
     @ExceptionHandler(BadCredentialsException.class)
@@ -49,7 +49,7 @@ public class GlobalExceptionHandler {
         log.error("Authentication failed: {}", ex.getMessage());
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
-                .body(BaseResponse.error("Invalid username or password", null));
+                .body(BaseResponse.error("Invalid username or password"));
     }
 
     @ExceptionHandler(AccessDeniedException.class)
@@ -57,7 +57,7 @@ public class GlobalExceptionHandler {
         log.error("Access denied: {}", ex.getMessage());
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
-                .body(BaseResponse.error("Access denied", null));
+                .body(BaseResponse.error("Access denied"));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -70,7 +70,7 @@ public class GlobalExceptionHandler {
         });
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(BaseResponse.error("Validation failed", errors));
+                .body(BaseResponse.error("Validation failed"));
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
@@ -83,7 +83,7 @@ public class GlobalExceptionHandler {
         });
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(BaseResponse.error("Validation failed", errors));
+                .body(BaseResponse.error("Validation failed"));
     }
 
     @ExceptionHandler(Exception.class)
@@ -91,6 +91,6 @@ public class GlobalExceptionHandler {
         log.error("Unexpected error occurred", ex);
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(BaseResponse.error("An unexpected error occurred", null));
+                .body(BaseResponse.error(ex.getMessage()));
     }
-} 
+}

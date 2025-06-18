@@ -1,7 +1,8 @@
 package com.aide.backend.service.impl;
 
-import com.aide.backend.model.dto.patients.ImageUploadResponse;
-import com.aide.backend.model.entity.patients.Image;
+import com.aide.backend.domain.dto.patients.ImageUploadResponse;
+import com.aide.backend.domain.entity.patients.Image;
+import com.aide.backend.exception.BusinessException;
 import com.aide.backend.repository.ImageRepository;
 import com.aide.backend.service.UploadService;
 import com.cloudinary.Cloudinary;
@@ -26,18 +27,18 @@ public class CloudinaryUploadServiceImpl implements UploadService {
     @Override
     public List<ImageUploadResponse> uploadImages(List<MultipartFile> files) {
         if (files == null || files.isEmpty()) {
-            throw new IllegalArgumentException("No files provided");
+            throw new BusinessException("No files provided");
         }
 
         if (files.size() > MAX_FILES) {
-            throw new IllegalArgumentException("Maximum " + MAX_FILES + " files allowed");
+            throw new BusinessException("Maximum " + MAX_FILES + " files allowed");
         }
 
         List<ImageUploadResponse> responses = new ArrayList<>();
-        
+
         for (MultipartFile file : files) {
             if (file.isEmpty()) {
-                throw new IllegalArgumentException("File is empty");
+                throw new BusinessException("File is empty");
             }
 
             try {

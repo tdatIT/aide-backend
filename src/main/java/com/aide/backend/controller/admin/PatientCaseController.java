@@ -1,10 +1,11 @@
 package com.aide.backend.controller.admin;
 
-import com.aide.backend.model.dto.patients.CreatePatientCaseRequest;
-import com.aide.backend.model.dto.patients.PatientCaseDTO;
-import com.aide.backend.model.dto.common.PageResponse;
-import com.aide.backend.model.dto.common.BaseResponse;
-import com.aide.backend.service.PatientCaseService;
+import com.aide.backend.domain.dto.common.BaseResponse;
+import com.aide.backend.domain.dto.common.PageResponse;
+import com.aide.backend.domain.dto.patients.CreatePatientRequest;
+import com.aide.backend.domain.dto.patients.PatientDTO;
+import com.aide.backend.domain.dto.patients.UpdatePatientRequest;
+import com.aide.backend.service.PatientService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -17,31 +18,34 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class PatientCaseController {
 
-    private final PatientCaseService service;
+    private final PatientService service;
 
     @PostMapping
-    public ResponseEntity<BaseResponse<PatientCaseDTO>> create(@RequestBody CreatePatientCaseRequest request) {
-        return ResponseEntity.ok(BaseResponse.success(service.create(request)));
+    public ResponseEntity<BaseResponse<PatientDTO>> create(@RequestBody CreatePatientRequest request) {
+        service.create(request);
+        return ResponseEntity.ok(BaseResponse.success("success", null));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<BaseResponse<PatientCaseDTO>> update(@PathVariable Long id, @RequestBody CreatePatientCaseRequest request) {
-        return ResponseEntity.ok(BaseResponse.success(service.update(id, request)));
+    public ResponseEntity<BaseResponse<PatientDTO>> update(@PathVariable Long id, @RequestBody UpdatePatientRequest request) {
+        service.update(request);
+        return ResponseEntity.ok(BaseResponse.success("success", null));
+
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<BaseResponse<Void>> delete(@PathVariable Long id) {
-        service.delete(id);
+        service.softDeleteById(id);
         return ResponseEntity.ok(BaseResponse.success("Patient case deleted successfully", null));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<BaseResponse<PatientCaseDTO>> findById(@PathVariable Long id) {
+    public ResponseEntity<BaseResponse<PatientDTO>> findById(@PathVariable Long id) {
         return ResponseEntity.ok(BaseResponse.success(service.findById(id)));
     }
 
     @GetMapping
-    public ResponseEntity<BaseResponse<PageResponse<PatientCaseDTO>>> findAll(Pageable pageable) {
+    public ResponseEntity<BaseResponse<PageResponse<PatientDTO>>> findAll(Pageable pageable) {
         return ResponseEntity.ok(BaseResponse.success(service.findAll(pageable)));
     }
 

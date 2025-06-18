@@ -16,18 +16,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import static com.aide.backend.config.Constants.*;
+
 @Slf4j
 @Service
 public class JwtService {
 
     @Value("${jwt.secret}")
     private String secretKey;
-
-    @Value("${jwt.expiration}")
-    private long jwtExpiration;
-
-    @Value("${jwt.refresh-token.expiration}")
-    private long refreshExpiration;
 
     private Key key;
 
@@ -50,11 +46,11 @@ public class JwtService {
     }
 
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
-        return buildToken(extraClaims, userDetails, jwtExpiration);
+        return buildToken(extraClaims, userDetails, (long) MAX_ACCESS_TOKEN_EXP * SECOND_TO_MILLI);
     }
 
     public String generateRefreshToken(UserDetails userDetails) {
-        return buildToken(new HashMap<>(), userDetails, refreshExpiration);
+        return buildToken(new HashMap<>(), userDetails, (long) MAX_REFRESH_TOKEN_EXP * SECOND_TO_MILLI);
     }
 
     private String buildToken(Map<String, Object> extraClaims, UserDetails userDetails, long expiration) {
@@ -62,7 +58,7 @@ public class JwtService {
                 .builder()
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
-                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
@@ -89,4 +85,4 @@ public class JwtService {
                 .parseClaimsJws(token)
                 .getBody();
     }
-} 
+}

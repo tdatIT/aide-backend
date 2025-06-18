@@ -1,7 +1,7 @@
 package com.aide.backend.command;
 
-import com.aide.backend.model.entity.user.Role;
-import com.aide.backend.model.enums.RoleEnum;
+import com.aide.backend.domain.entity.user.Role;
+import com.aide.backend.domain.enums.RoleEnum;
 import com.aide.backend.repository.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.event.ApplicationReadyEvent;

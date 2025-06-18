@@ -1,10 +1,10 @@
 package com.aide.backend.service.impl;
 
-import com.aide.backend.exception.BadRequestException;
-import com.aide.backend.model.entity.user.User;
-import com.aide.backend.model.entity.user.OTP;
-import com.aide.backend.model.entity.user.UserCredential;
-import com.aide.backend.model.enums.CredentialType;
+import com.aide.backend.domain.entity.user.OTP;
+import com.aide.backend.domain.entity.user.User;
+import com.aide.backend.domain.entity.user.UserCredential;
+import com.aide.backend.domain.enums.CredentialType;
+import com.aide.backend.exception.ResourceNotFoundException;
 import com.aide.backend.repository.OTPRepository;
 import com.aide.backend.repository.UserCredentialRepository;
 import com.aide.backend.repository.UserRepository;
@@ -30,9 +30,6 @@ public class ForgotPasswordServiceImpl implements ForgotPasswordService {
     @Override
     @Transactional
     public void sendPasswordResetOTP(String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new BadRequestException("User not found with email: " + email));
-
         String otp = generateOTP();
         OTP otpEntity = OTP.builder()
                 .email(email)
@@ -49,16 +46,16 @@ public class ForgotPasswordServiceImpl implements ForgotPasswordService {
     @Transactional
     public void resetPassword(String email, String otp, String newPassword) {
         OTP otpEntity = otpRepository.findByEmailAndCodeAndUsedFalse(email, otp)
-                .orElseThrow(() -> new BadRequestException("Invalid OTP"));
+                .orElseThrow(() -> new ResourceNotFoundException("Invalid OTP"));
 
         if (otpEntity.getExpiryDate().isBefore(LocalDateTime.now())) {
-            throw new BadRequestException("OTP has expired");
+            throw new ResourceNotFoundException("OTP has expired");
         }
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new BadRequestException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         UserCredential cred = userCredentialRepository.findByUserIdAndCredType(user.getId(), CredentialType.PASSWORD)
-                .orElseThrow(() -> new BadRequestException("Credential not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Credential not found"));
 
         cred.setPassword(passwordEncoder.encode(newPassword));
         userCredentialRepository.save(cred);

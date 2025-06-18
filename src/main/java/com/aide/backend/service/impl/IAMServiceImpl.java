@@ -1,16 +1,17 @@
 package com.aide.backend.service.impl;
 
+import com.aide.backend.domain.dto.common.PageResponse;
+import com.aide.backend.domain.dto.iam.CreateRoleRequest;
+import com.aide.backend.domain.dto.iam.RoleDTO;
+import com.aide.backend.domain.dto.iam.UserDTO;
+import com.aide.backend.domain.entity.user.Role;
+import com.aide.backend.domain.entity.user.User;
+import com.aide.backend.domain.enums.RoleEnum;
+import com.aide.backend.exception.BusinessException;
 import com.aide.backend.exception.ResourceNotFoundException;
-import com.aide.backend.model.dto.iam.CreateRoleRequest;
-import com.aide.backend.model.dto.iam.RoleDTO;
-import com.aide.backend.model.dto.iam.UserDTO;
-import com.aide.backend.model.entity.user.Role;
-import com.aide.backend.model.entity.user.User;
-import com.aide.backend.model.enums.RoleEnum;
 import com.aide.backend.repository.RoleRepository;
 import com.aide.backend.repository.UserRepository;
 import com.aide.backend.service.IAMService;
-import com.aide.backend.model.dto.common.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -49,7 +50,7 @@ public class IAMServiceImpl implements IAMService {
     @Transactional
     public RoleDTO createRole(CreateRoleRequest request) {
         if (roleRepository.existsByRoleName(request.getRoleName())) {
-            throw new IllegalArgumentException("Role with name " + request.getRoleName() + " already exists");
+            throw new ResourceNotFoundException("Role with name " + request.getRoleName() + " already exists");
         }
 
         Role role = new Role();
@@ -67,7 +68,7 @@ public class IAMServiceImpl implements IAMService {
                 .orElseThrow(() -> new ResourceNotFoundException("Role not found with id: " + roleId));
 
         if (role.getRoleName().equals(RoleEnum.ROLE_SUPER_ADMIN.name())) {
-            throw new IllegalArgumentException("Cannot delete SUPER_ADMIN role");
+            throw new BusinessException("Cannot delete SUPER_ADMIN role");
         }
 
         role.setActive(false);
@@ -85,7 +86,7 @@ public class IAMServiceImpl implements IAMService {
         if (role.getRoleName().equals(RoleEnum.ROLE_SUPER_ADMIN.name())) {
             // Check if there's already a super admin
             if (userRepository.existsByRoles_RoleName(RoleEnum.ROLE_SUPER_ADMIN.name())) {
-                throw new IllegalArgumentException("A super admin already exists in the system");
+                throw new BusinessException("A super admin already exists in the system");
             }
         }
 
@@ -102,7 +103,7 @@ public class IAMServiceImpl implements IAMService {
                 .orElseThrow(() -> new ResourceNotFoundException("Role not found with id: " + roleId));
 
         if (role.getRoleName().equals(RoleEnum.ROLE_SUPER_ADMIN.name())) {
-            throw new IllegalArgumentException("Cannot remove SUPER_ADMIN role");
+            throw new BusinessException("Cannot remove SUPER_ADMIN role");
         }
 
         user.getRoles().remove(role);
@@ -129,4 +130,4 @@ public class IAMServiceImpl implements IAMService {
         dto.setActive(role.isActive());
         return dto;
     }
-} 
+}

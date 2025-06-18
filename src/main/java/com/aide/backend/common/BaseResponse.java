@@ -1,6 +1,5 @@
 package com.aide.backend.common;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,12 +9,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class BaseResponse<T> {
     private boolean success;
     private String message;
     private T data;
-    private Object errors;
 
     public static <T> BaseResponse<T> success(T data) {
         return BaseResponse.<T>builder()
@@ -38,12 +35,4 @@ public class BaseResponse<T> {
                 .message(message)
                 .build();
     }
-
-    public static <T> BaseResponse<T> error(String message, Object errors) {
-        return BaseResponse.<T>builder()
-                .success(false)
-                .message(message)
-                .errors(errors)
-                .build();
-    }
-} 
+}

@@ -1,7 +1,10 @@
 package com.aide.backend.controller.auth;
 
 import com.aide.backend.common.BaseResponse;
-import com.aide.backend.model.dto.auth.*;
+import com.aide.backend.domain.dto.auth.LoginRequest;
+import com.aide.backend.domain.dto.auth.LoginResponse;
+import com.aide.backend.domain.dto.auth.RegisterRequest;
+import com.aide.backend.domain.dto.auth.TokenResponse;
 import com.aide.backend.service.AuthService;
 import com.aide.backend.service.ForgotPasswordService;
 import com.aide.backend.service.OAuth2Service;
@@ -26,7 +29,7 @@ public class AuthController {
     @Operation(summary = "Register a new user")
     public ResponseEntity<BaseResponse<Void>> register(@Valid @RequestBody RegisterRequest request) {
         authService.register(request);
-        return ResponseEntity.ok(BaseResponse.<Void>success("User registered successfully", null));
+        return ResponseEntity.ok(BaseResponse.success("User registered successfully", null));
     }
 
     @PostMapping("/login")
@@ -74,7 +77,7 @@ public class AuthController {
     @PostMapping("/oauth2/google")
     @Operation(summary = "Authenticate with Google ID token")
     public ResponseEntity<BaseResponse<LoginResponse>> googleLogin(@RequestParam String token) {
-        LoginResponse res = oAuth2Service.handleGoogleAccessToken(token);
+        LoginResponse res = oAuth2Service.handleGoogleIdToken(token);
         return ResponseEntity.ok(BaseResponse.success(res));
     }
 }

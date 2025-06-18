@@ -1,8 +1,9 @@
 package com.aide.backend.repository;
 
-import com.aide.backend.model.entity.user.Role;
+import com.aide.backend.domain.entity.user.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
 import java.util.Optional;
 
 @Repository

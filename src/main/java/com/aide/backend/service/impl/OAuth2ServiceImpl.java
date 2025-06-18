@@ -1,22 +1,21 @@
 package com.aide.backend.service.impl;
 
+import com.aide.backend.domain.dto.auth.LoginResponse;
+import com.aide.backend.domain.dto.auth.UserProfileDTO;
+import com.aide.backend.domain.entity.user.AuthUserDetails;
+import com.aide.backend.domain.entity.user.User;
+import com.aide.backend.domain.entity.user.UserCredential;
+import com.aide.backend.domain.enums.CredentialType;
+import com.aide.backend.domain.enums.RoleEnum;
 import com.aide.backend.exception.BusinessException;
-import com.aide.backend.model.dto.auth.LoginResponse;
-import com.aide.backend.model.dto.auth.TokenResponse;
-import com.aide.backend.model.dto.auth.UserProfileDTO;
-import com.aide.backend.model.entity.user.AuthUserDetails;
-import com.aide.backend.model.entity.user.User;
-import com.aide.backend.model.entity.user.UserCredential;
-import com.aide.backend.model.enums.CredentialType;
-import com.aide.backend.model.enums.RoleEnum;
+import com.aide.backend.exception.ResourceNotFoundException;
 import com.aide.backend.repository.RoleRepository;
 import com.aide.backend.repository.UserRepository;
-import com.aide.backend.service.OAuth2Service;
 import com.aide.backend.service.JwtService;
+import com.aide.backend.service.OAuth2Service;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
-import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -24,10 +23,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.Collections;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -42,50 +39,35 @@ public class OAuth2ServiceImpl implements OAuth2Service {
 
     @Override
     @Transactional
-    public TokenResponse verifyGoogleToken(String idToken) {
+    public LoginResponse handleGoogleIdToken(String token) {
         try {
-            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory()).setAudience(Collections.singletonList(googleClientId)).build();
-
-            GoogleIdToken googleIdToken = verifier.verify(idToken);
-            if (googleIdToken == null) {
-                throw new BusinessException("Invalid ID token");
-            }
-
-            Payload payload = googleIdToken.getPayload();
-            return processGoogleUser(payload);
-        } catch (Exception e) {
-            log.error("Error during token verification: {}", e.getMessage(), e);
-            throw new BusinessException("Failed to verify Google token: " + e.getMessage());
-        }
-    }
-
-    @Override
-    @Transactional
-    public LoginResponse handleGoogleAccessToken(String accessToken) {
-        try {
-            if (!StringUtils.hasText(accessToken)) {
+            if (!StringUtils.hasText(token)) {
                 throw new BusinessException("Access token cannot be null or empty");
             }
-
+            var transport = GoogleNetHttpTransport.newTrustedTransport();
+            var jsonFactory = GsonFactory.getDefaultInstance();
             // Fetch user info from Google API
-            RestTemplate restTemplate = new RestTemplate();
-            String userInfoUrl = "https://www.googleapis.com/oauth2/v2/userinfo?access_token=" + accessToken;
-            Map<String, Object> userInfo = restTemplate.getForObject(userInfoUrl, Map.class);
+            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
+                    .setAudience(Collections.singletonList(this.googleClientId))
+                    .build();
 
-            if (userInfo == null) {
-                throw new BusinessException("Failed to fetch user info from Google");
+            GoogleIdToken idToken = verifier.verify(token);
+            if (idToken == null) {
+                throw new RuntimeException("Invalid ID token.");
             }
 
-            String email = (String) userInfo.get("email");
-            String googleId = (String) userInfo.get("id");
-            String name = (String) userInfo.get("name");
-            String avatar = (String) userInfo.get("picture");
+            String email = (String) idToken.getPayload().get("email");
+            String googleId = idToken.getPayload().getSubject();
+            String name = (String) idToken.getPayload().get("name");
+            String avatar = (String) idToken.getPayload().get("picture");
 
             // Create or get user
-            User user = userRepository.findByEmail(email).orElseGet(() -> createGoogleUser(email, googleId, name, avatar));
+            User user = userRepository.findByEmail(email)
+                    .orElseGet(() -> createGoogleUser(email, googleId, name, avatar));
 
             // Generate JWT tokens
             AuthUserDetails userDetails = new AuthUserDetails(
+                    user.getId(),
                     user.getUsername(),
                     null, user.isActive(),
                     true,
@@ -96,58 +78,36 @@ public class OAuth2ServiceImpl implements OAuth2Service {
             String jwtAccessToken = jwtService.generateToken(userDetails);
             String refreshToken = jwtService.generateRefreshToken(userDetails);
 
-            var loginResponse = new LoginResponse();
-            loginResponse.setTokenResponse(TokenResponse.builder().accessToken(jwtAccessToken).refreshToken(refreshToken).tokenType("Bearer").expiresIn(24 * 60 * 60) // 24 hours in seconds
-                    .build());
-            loginResponse.setUserProfile(UserProfileDTO.builder().fullName(name).username(email).avtarUrl(avatar).build());
-            return loginResponse;
+            return LoginResponse.builder().accessToken(jwtAccessToken)
+                    .refreshToken(refreshToken)
+                    .expiresIn(24 * 60 * 60)
+                    .profile(UserProfileDTO.builder().fullName(name).username(email).avatar(avatar).build())
+                    .build();
         } catch (Exception e) {
             log.error("Error processing Google access token: {}", e.getMessage(), e);
             throw new BusinessException("Failed to process Google access token: " + e.getMessage());
         }
     }
 
-    private TokenResponse processGoogleUser(Payload payload) {
-        String email = payload.getEmail();
-        String googleId = payload.getSubject();
-
-        User user = userRepository.findByEmail(email).orElseGet(() -> createGoogleUser(email, googleId, (String) payload.get("name"), (String) payload.get("picture")));
-
-        AuthUserDetails userDetails = new AuthUserDetails(
-                user.getEmail(),
-                null,
-                user.isActive(),
-                true,
-                true,
-                true,
-                user.getRoles());
-
-        String accessToken = jwtService.generateToken(userDetails);
-        String refreshToken = jwtService.generateRefreshToken(userDetails);
-
-        return TokenResponse.builder().accessToken(accessToken).refreshToken(refreshToken).tokenType("Bearer").expiresIn(24 * 60 * 60) // 24 hours in seconds
-                .build();
-    }
-
     private User createGoogleUser(String email, String googleId, String name, String avatar) {
-        var userRole = roleRepository.findByRoleName(RoleEnum.ROLE_USER.toString()).orElseThrow(() -> new BusinessException("User role not found"));
+        var userRole = roleRepository.findByRoleName(RoleEnum.ROLE_USER.toString()).
+                orElseThrow(() -> new ResourceNotFoundException("User role not found"));
 
-        UserCredential googleCred = new UserCredential();
-        googleCred.setCredType(CredentialType.OIDC);
-        googleCred.setProvider("GOOGLE");
-        googleCred.setOidcUserId(googleId);
-        googleCred.setActive(true);
+        var googleCred = UserCredential.builder()
+                .credType(CredentialType.OIDC)
+                .provider("GOOGLE")
+                .oidcUserId(googleId)
+                .active(true).build();
 
-        User user = new User();
-        user.setEmail(email);
-        user.setUsername(email);
-        user.setFullName(name);
-        user.setAvatarUrl(avatar);
-        user.setActive(true);
+        var user = User.builder()
+                .email(email)
+                .username(email)
+                .fullName(name)
+                .avatarUrl(avatar)
+                .active(true)
+                .build();
         user.getCredentials().add(googleCred);
         user.getRoles().add(userRole);
-        googleCred.setUser(user);
-
         return userRepository.save(user);
     }
 }

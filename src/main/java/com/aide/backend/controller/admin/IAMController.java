@@ -1,14 +1,11 @@
 package com.aide.backend.controller.admin;
 
-import com.aide.backend.model.dto.iam.CreateRoleRequest;
-import com.aide.backend.model.dto.iam.RoleDTO;
-import com.aide.backend.model.dto.iam.UserDTO;
-import com.aide.backend.model.entity.user.Role;
-import com.aide.backend.model.entity.user.User;
-import com.aide.backend.model.enums.RoleEnum;
+import com.aide.backend.domain.dto.common.BaseResponse;
+import com.aide.backend.domain.dto.common.PageResponse;
+import com.aide.backend.domain.dto.iam.CreateRoleRequest;
+import com.aide.backend.domain.dto.iam.RoleDTO;
+import com.aide.backend.domain.dto.iam.UserDTO;
 import com.aide.backend.service.IAMService;
-import com.aide.backend.model.dto.common.PageResponse;
-import com.aide.backend.model.dto.common.BaseResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -65,4 +62,4 @@ public class IAMController {
     public ResponseEntity<BaseResponse<UserDTO>> removeRoleFromUser(@PathVariable Long userId, @PathVariable Long roleId) {
         return ResponseEntity.ok(BaseResponse.success(iamService.removeRoleFromUser(userId, roleId)));
     }
-} 
+}

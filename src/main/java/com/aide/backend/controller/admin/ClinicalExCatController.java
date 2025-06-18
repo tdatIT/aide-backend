@@ -1,9 +1,9 @@
 package com.aide.backend.controller.admin;
 
 import com.aide.backend.common.BaseResponse;
-import com.aide.backend.model.dto.patients.ClinicalExamCategoryDTO;
-import com.aide.backend.service.ClinicalExamCategoryService;
-import com.aide.backend.model.dto.common.PageResponse;
+import com.aide.backend.domain.dto.common.PageResponse;
+import com.aide.backend.domain.dto.patients.ClinicalCateDTO;
+import com.aide.backend.service.ClinicalCateService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,38 +22,41 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Clinical Exam Categories", description = "Clinical exam category management endpoints")
 public class ClinicalExCatController {
 
-    private final ClinicalExamCategoryService service;
+    private final ClinicalCateService service;
 
     @PostMapping
     @Operation(summary = "Create a new clinical exam category")
-    public ResponseEntity<BaseResponse<ClinicalExamCategoryDTO>> create(@Valid @RequestBody ClinicalExamCategoryDTO dto) {
-        return ResponseEntity.ok(BaseResponse.success(service.create(dto)));
+    public ResponseEntity<BaseResponse<ClinicalCateDTO>> create(@Valid @RequestBody ClinicalCateDTO dto) {
+        service.create(dto);
+        return ResponseEntity.ok(BaseResponse.success("success", null));
+
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Update a clinical exam category")
-    public ResponseEntity<BaseResponse<ClinicalExamCategoryDTO>> update(
+    public ResponseEntity<BaseResponse<ClinicalCateDTO>> update(
             @PathVariable Long id,
-            @Valid @RequestBody ClinicalExamCategoryDTO dto) {
-        return ResponseEntity.ok(BaseResponse.success(service.update(id, dto)));
+            @Valid @RequestBody ClinicalCateDTO dto) {
+        service.update(id, dto);
+        return ResponseEntity.ok(BaseResponse.success("success", null));
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete a clinical exam category")
     public ResponseEntity<BaseResponse<Void>> delete(@PathVariable Long id) {
         service.delete(id);
-        return ResponseEntity.ok(BaseResponse.success("Category deleted successfully", null));
+        return ResponseEntity.ok(BaseResponse.success("success", null));
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get a clinical exam category by ID")
-    public ResponseEntity<BaseResponse<ClinicalExamCategoryDTO>> findById(@PathVariable Long id) {
+    public ResponseEntity<BaseResponse<ClinicalCateDTO>> findById(@PathVariable Long id) {
         return ResponseEntity.ok(BaseResponse.success(service.findById(id)));
     }
 
     @GetMapping
     @Operation(summary = "Get all clinical exam categories with pagination")
-    public ResponseEntity<BaseResponse<PageResponse<ClinicalExamCategoryDTO>>> findAll(
+    public ResponseEntity<BaseResponse<PageResponse<ClinicalCateDTO>>> findAll(
             @Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Page size") @RequestParam(defaultValue = "10") int size) {
 
