@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.Collections;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -106,7 +107,7 @@ public class OAuth2ServiceImpl implements OAuth2Service {
                 .avatarUrl(avatar)
                 .active(true)
                 .build();
-        user.getCredentials().add(googleCred);
+        user.setCredentials(Set.of(googleCred));
         user.getRoles().add(userRole);
         return userRepository.save(user);
     }
