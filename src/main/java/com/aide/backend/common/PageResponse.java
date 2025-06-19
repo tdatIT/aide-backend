@@ -1,4 +1,4 @@
-package com.aide.backend.domain.dto.common;
+package com.aide.backend.common;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

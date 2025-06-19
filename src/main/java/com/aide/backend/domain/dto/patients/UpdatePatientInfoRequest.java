@@ -5,11 +5,9 @@ import com.aide.backend.domain.enums.Mode;
 import lombok.Builder;
 import lombok.Data;
 
-import java.util.List;
-
 @Data
 @Builder
-public class UpdatePatientRequest {
+public class UpdatePatientInfoRequest {
     private Long id;
     private String name;
     private Gender gender;
@@ -22,8 +20,6 @@ public class UpdatePatientRequest {
     private String clinicalHistory;
     private String[] suggestedTests;
     private String instruction;
-    private List<UpdateTestResultRequest> clinicalExams;
-    private List<UpdateTestResultRequest> paraclinicalTests;
     private DiagnosisDTO diagnosis;
     private TreatmentDTO treatment;
 }

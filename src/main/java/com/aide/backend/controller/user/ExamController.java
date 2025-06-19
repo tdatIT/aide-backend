@@ -1,7 +1,7 @@
 package com.aide.backend.controller.user;
 
-import com.aide.backend.domain.dto.common.BaseResponse;
-import com.aide.backend.domain.dto.common.PageResponse;
+import com.aide.backend.common.BaseResponse;
+import com.aide.backend.common.PageResponse;
 import com.aide.backend.domain.dto.exam.*;
 import com.aide.backend.domain.entity.user.AuthUserDetails;
 import com.aide.backend.service.ExamService;

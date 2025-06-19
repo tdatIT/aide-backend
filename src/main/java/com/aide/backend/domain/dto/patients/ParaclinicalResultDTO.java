@@ -11,8 +11,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ParaclinicalResultDTO {
     private Long id;
+    private Long paraclinicalId;
     private String testName;
     private String textResult;
     private String notes;
-    private String[] imageUrls;
+    private ImageDTO[] images;
 }

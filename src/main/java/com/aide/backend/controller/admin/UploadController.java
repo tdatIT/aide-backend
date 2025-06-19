@@ -1,6 +1,6 @@
 package com.aide.backend.controller.admin;
 
-import com.aide.backend.domain.dto.common.BaseResponse;
+import com.aide.backend.common.BaseResponse;
 import com.aide.backend.domain.dto.patients.ImageUploadResponse;
 import com.aide.backend.exception.BusinessException;
 import com.aide.backend.service.UploadService;

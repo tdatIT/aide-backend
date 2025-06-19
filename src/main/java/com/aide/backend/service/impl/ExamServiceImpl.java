@@ -1,6 +1,6 @@
 package com.aide.backend.service.impl;
 
-import com.aide.backend.domain.dto.common.PageResponse;
+import com.aide.backend.common.PageResponse;
 import com.aide.backend.domain.dto.exam.*;
 import com.aide.backend.domain.entity.exams.ChatMessage;
 import com.aide.backend.domain.entity.exams.ExamSession;

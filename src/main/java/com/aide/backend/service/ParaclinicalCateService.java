@@ -1,6 +1,6 @@
 package com.aide.backend.service;
 
-import com.aide.backend.domain.dto.common.PageResponse;
+import com.aide.backend.common.PageResponse;
 import com.aide.backend.domain.dto.patients.ParaclinicalCateDTO;
 import org.springframework.data.domain.Pageable;
 

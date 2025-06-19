@@ -1,18 +1,14 @@
 package com.aide.backend.service.impl;
 
-import com.aide.backend.domain.dto.common.PageResponse;
+import com.aide.backend.common.PageResponse;
 import com.aide.backend.domain.dto.patients.*;
 import com.aide.backend.domain.entity.patients.*;
 import com.aide.backend.domain.enums.PatientStatus;
 import com.aide.backend.exception.ResourceNotFoundException;
-import com.aide.backend.repository.ClinicalExamCategoryRepository;
-import com.aide.backend.repository.ImageRepository;
-import com.aide.backend.repository.ParaclinicalCateRepository;
-import com.aide.backend.repository.PatientRepository;
+import com.aide.backend.repository.*;
 import com.aide.backend.service.PatientService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,6 +31,8 @@ public class PatientServiceImpl implements PatientService {
     private final ClinicalExamCategoryRepository clinicalExamCategoryRepository;
     private final ParaclinicalCateRepository paraclinicalTestCategoryRepository;
     private final ImageRepository imageRepository;
+    private final ClinicalResultRepository cliResultRepository;
+    private final ParaClinicalResultRepository paraCliResultRepository;
 
     @Override
     @Transactional
@@ -64,8 +62,8 @@ public class PatientServiceImpl implements PatientService {
 
     @Override
     @Transactional
-    @CachePut(value = "patients", key = "#request.id")
-    public void update(UpdatePatientRequest request) {
+    @CacheEvict(value = "patients", key = "#request.id")
+    public void updatePatientInfo(UpdatePatientInfoRequest request) {
         var patient = repository.findById(request.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Patient case not found with id: " + request.getId()));
 
@@ -83,12 +81,104 @@ public class PatientServiceImpl implements PatientService {
         patient.setStatus(UNPUBLISHED.toString());
 
         // Handle related entities updates
-        handleUpdateClinicalExams(patient, request.getClinicalExams());
-        handleUpdateParaclinicalTests(patient, request.getParaclinicalTests());
         handleUpdateDiagnosis(patient, request.getDiagnosis());
         handleUpdateTreatment(patient, request.getTreatment());
-
         repository.save(patient);
+    }
+
+    @Override
+    @Transactional
+    public void updatePatientTest(UpdatePatientTestRequest request) {
+        var patient = repository.findById(request.getPatientId())
+                .orElseThrow(() -> new ResourceNotFoundException("Patient case not found with id: " + request.getPatientId()));
+
+        for (UpdateTestResultRequest clinicalResult : request.getClinicalTests()) {
+            switch (clinicalResult.getAction()) {
+                case CREATE -> {
+                    var newClinicalExam = ClinicalResult.builder()
+                            .patient(patient)
+                            .clinicalCategories(findClinicalExamCategory(clinicalResult.getTestCategoryId()))
+                            .textResult(clinicalResult.getTextResult())
+                            .notes(clinicalResult.getNotes())
+                            .build();
+                    if (clinicalResult.getImageKeys() != null && clinicalResult.getImageKeys().length > 0) {
+                        Set<Image> images = new HashSet<>();
+                        for (Long imageKey : clinicalResult.getImageKeys()) {
+                            if (isValidImageKey(imageKey)) {
+                                images.add(findImage(imageKey));
+                            }
+                        }
+                        newClinicalExam.setImages(images);
+                    }
+                    cliResultRepository.save(newClinicalExam);
+                }
+                case DELETE -> cliResultRepository.deleteById(clinicalResult.getId());
+                case UPDATE -> {
+                    ClinicalResult existingClinicalExam = cliResultRepository.findById(clinicalResult.getId())
+                            .orElseThrow(() -> new ResourceNotFoundException("Clinical exam not found with id: " + clinicalResult.getId()));
+                    existingClinicalExam.setTextResult(clinicalResult.getTextResult());
+                    existingClinicalExam.setNotes(clinicalResult.getNotes());
+                    existingClinicalExam.setClinicalCategories(findClinicalExamCategory(clinicalResult.getTestCategoryId()));
+
+                    if (clinicalResult.getImageKeys() != null && clinicalResult.getImageKeys().length > 0) {
+                        Set<Image> images = new HashSet<>();
+                        for (Long imageKey : clinicalResult.getImageKeys()) {
+                            if (isValidImageKey(imageKey)) {
+                                images.add(findImage(imageKey));
+                            }
+                        }
+                        existingClinicalExam.setImages(images);
+                    } else {
+                        existingClinicalExam.setImages(new HashSet<>());
+                    }
+                    cliResultRepository.save(existingClinicalExam);
+                }
+            }
+        }
+
+        for (UpdateTestResultRequest paraCliResult : request.getClinicalTests()) {
+            switch (paraCliResult.getAction()) {
+                case CREATE -> {
+                    var newParaclinicalTest = ParaclinicalResult.builder()
+                            .patient(patient)
+                            .paraclinicalTestCategory(findParaclinicalTestCategory(paraCliResult.getTestCategoryId()))
+                            .textResult(paraCliResult.getTextResult())
+                            .notes(paraCliResult.getNotes())
+                            .build();
+                    if (paraCliResult.getImageKeys() != null && paraCliResult.getImageKeys().length > 0) {
+                        Set<Image> images = new HashSet<>();
+                        for (Long imageKey : paraCliResult.getImageKeys()) {
+                            if (isValidImageKey(imageKey)) {
+                                images.add(findImage(imageKey));
+                            }
+                        }
+                        newParaclinicalTest.setImages(images);
+                    }
+                    paraCliResultRepository.save(newParaclinicalTest);
+                }
+                case DELETE -> paraCliResultRepository.deleteById(paraCliResult.getId());
+                case UPDATE -> {
+                    ParaclinicalResult existingParaClinicalTest = paraCliResultRepository.findById(paraCliResult.getId())
+                            .orElseThrow(() -> new ResourceNotFoundException("Paraclinical test not found with id: " + paraCliResult.getId()));
+                    existingParaClinicalTest.setTextResult(paraCliResult.getTextResult());
+                    existingParaClinicalTest.setNotes(paraCliResult.getNotes());
+                    existingParaClinicalTest.setParaclinicalTestCategory(findParaclinicalTestCategory(paraCliResult.getTestCategoryId()));
+
+                    if (paraCliResult.getImageKeys() != null && paraCliResult.getImageKeys().length > 0) {
+                        Set<Image> images = new HashSet<>();
+                        for (Long imageKey : paraCliResult.getImageKeys()) {
+                            if (isValidImageKey(imageKey)) {
+                                images.add(findImage(imageKey));
+                            }
+                        }
+                        existingParaClinicalTest.setImages(images);
+                    } else {
+                        existingParaClinicalTest.setImages(new HashSet<>());
+                    }
+                    paraCliResultRepository.save(existingParaClinicalTest);
+                }
+            }
+        }
     }
 
     @Override
@@ -157,29 +247,36 @@ public class PatientServiceImpl implements PatientService {
     }
 
     private ClinicalResultDTO mapToClinicalExamDTO(ClinicalResult result) {
-        ClinicalResultDTO dto = new ClinicalResultDTO();
-        dto.setId(result.getId());
-        dto.setTestName(result.getClinicalCategories().getName());
-        dto.setTextResult(result.getTextResult());
-        dto.setNotes(result.getNotes());
+        var dto = ClinicalResultDTO.builder()
+                .id(result.getId())
+                .clinicalCateId(result.getClinicalCategories().getId())
+                .textResult(result.getTextResult())
+                .testName(result.getClinicalCategories().getName())
+                .notes(result.getNotes())
+                .build();
+
         if (result.getImages() != null && !result.getImages().isEmpty()) {
-            dto.setImageUrls(result.getImages().stream()
-                    .map(Image::getUrl)
-                    .toArray(String[]::new));
+            dto.setImages(result.getImages().stream()
+                    .map(img ->
+                            ImageDTO.builder().url(img.getUrl()).id(img.getId()).build())
+                    .toArray(ImageDTO[]::new));
         }
         return dto;
     }
 
     private ParaclinicalResultDTO mapToParaclinicalTestDTO(ParaclinicalResult result) {
-        ParaclinicalResultDTO dto = new ParaclinicalResultDTO();
-        dto.setId(result.getId());
-        dto.setTextResult(result.getTextResult());
-        dto.setTestName(result.getParaclinicalTestCategory().getName());
-        dto.setNotes(result.getNotes());
+        var dto = ParaclinicalResultDTO.builder()
+                .id(result.getId())
+                .paraclinicalId(result.getParaclinicalTestCategory().getId())
+                .textResult(result.getTextResult())
+                .testName(result.getParaclinicalTestCategory().getName())
+                .notes(result.getNotes())
+                .build();
         if (result.getImages() != null && !result.getImages().isEmpty()) {
-            dto.setImageUrls(result.getImages().stream()
-                    .map(Image::getUrl)
-                    .toArray(String[]::new));
+            dto.setImages(result.getImages().stream()
+                    .map(img ->
+                            ImageDTO.builder().url(img.getUrl()).id(img.getId()).build())
+                    .toArray(ImageDTO[]::new));
         }
         return dto;
     }
@@ -315,8 +412,7 @@ public class PatientServiceImpl implements PatientService {
 
     private void handleUpdateClinicalExams(Patient patient, List<UpdateTestResultRequest> clinicalExams) {
         if (clinicalExams == null || clinicalExams.isEmpty()) {
-            // Clear existing clinical exams if none provided
-            patient.setClinicalExResults(new HashSet<>());
+            patient.setClinicalExResults(null);
             return;
         }
 
@@ -355,7 +451,7 @@ public class PatientServiceImpl implements PatientService {
             } else {
                 result.setImages(new HashSet<>());
             }
-
+            result.setPatient(patient);
             updatedResults.add(result);
         }
 
@@ -365,7 +461,7 @@ public class PatientServiceImpl implements PatientService {
     private void handleUpdateParaclinicalTests(Patient patient, List<UpdateTestResultRequest> paraclinicalTests) {
         if (paraclinicalTests == null || paraclinicalTests.isEmpty()) {
             // Clear existing paraclinical tests if none provided
-            patient.setParaclinicalExResults(new HashSet<>());
+            patient.setParaclinicalExResults(null);
             return;
         }
 
@@ -413,35 +509,18 @@ public class PatientServiceImpl implements PatientService {
 
     private void handleUpdateDiagnosis(Patient patient, DiagnosisDTO diagnosis) {
         if (diagnosis == null) {
-            patient.setDiagnosis(null);
             return;
         }
 
-        Diagnosis existingDiagnosis = patient.getDiagnosis();
-        if (diagnosis.getId() != null && existingDiagnosis != null && existingDiagnosis.getId().equals(diagnosis.getId())) {
-            // Update existing diagnosis
-            existingDiagnosis.setDiagDiff(diagnosis.getDiagDiff());
-            existingDiagnosis.setDiagPrelim(diagnosis.getDiagPrelim());
-            existingDiagnosis.setNotes(diagnosis.getNotes());
-        } else {
-            // Create new diagnosis
-            patient.setDiagnosis(createDiagnosis(patient, diagnosis));
-        }
+        patient.getDiagnosis().setDiagDiff(diagnosis.getDiagDiff());
+        patient.getDiagnosis().setDiagPrelim(diagnosis.getDiagPrelim());
+        patient.getDiagnosis().setNotes(diagnosis.getNotes());
     }
 
     private void handleUpdateTreatment(Patient patient, TreatmentDTO treatment) {
         if (treatment == null) {
-            patient.setTreatment(null);
             return;
         }
-
-        Treatment existingTreatment = patient.getTreatment();
-        if (treatment.getId() != null && existingTreatment != null && existingTreatment.getId().equals(treatment.getId())) {
-            // Update existing treatment
-            existingTreatment.setTreatmentNotes(treatment.getTreatmentNotes());
-        } else {
-            // Create new treatment
-            patient.setTreatment(createTreatment(patient, treatment));
-        }
+        patient.getTreatment().setTreatmentNotes(treatment.getTreatmentNotes());
     }
 }

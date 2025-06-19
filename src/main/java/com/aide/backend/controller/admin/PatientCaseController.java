@@ -1,10 +1,11 @@
 package com.aide.backend.controller.admin;
 
-import com.aide.backend.domain.dto.common.BaseResponse;
-import com.aide.backend.domain.dto.common.PageResponse;
+import com.aide.backend.common.BaseResponse;
+import com.aide.backend.common.PageResponse;
 import com.aide.backend.domain.dto.patients.CreatePatientRequest;
 import com.aide.backend.domain.dto.patients.PatientDTO;
-import com.aide.backend.domain.dto.patients.UpdatePatientRequest;
+import com.aide.backend.domain.dto.patients.UpdatePatientInfoRequest;
+import com.aide.backend.domain.dto.patients.UpdatePatientTestRequest;
 import com.aide.backend.service.PatientService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -23,14 +24,24 @@ public class PatientCaseController {
     @PostMapping
     public ResponseEntity<BaseResponse<PatientDTO>> create(@RequestBody CreatePatientRequest request) {
         service.create(request);
-        return ResponseEntity.ok(BaseResponse.success("success", null));
+        return ResponseEntity.ok(BaseResponse.success("ok", null));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<BaseResponse<PatientDTO>> update(@PathVariable Long id, @RequestBody UpdatePatientRequest request) {
-        service.update(request);
-        return ResponseEntity.ok(BaseResponse.success("success", null));
+    public ResponseEntity<BaseResponse<PatientDTO>> update(@RequestBody UpdatePatientInfoRequest request,
+                                                           @PathVariable Long id) {
+        request.setId(id);
+        service.updatePatientInfo(request);
+        return ResponseEntity.ok(BaseResponse.success("ok", null));
 
+    }
+
+    @PutMapping("/{id}/test-results")
+    public ResponseEntity<BaseResponse<Void>> updateTestResults(@PathVariable Long id,
+                                                                @RequestBody UpdatePatientTestRequest request) {
+        request.setPatientId(id);
+        service.updatePatientTest(request);
+        return ResponseEntity.ok(BaseResponse.success("ok", null));
     }
 
     @DeleteMapping("/{id}")

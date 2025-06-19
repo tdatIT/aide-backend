@@ -1,5 +1,6 @@
 package com.aide.backend.domain.dto.patients;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,11 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ClinicalResultDTO {
+public class ImageDTO {
     private Long id;
-    private Long clinicalCateId;
-    private String testName;
-    private String textResult;
-    private String notes;
-    private ImageDTO[] images;
+    private String url;
 }

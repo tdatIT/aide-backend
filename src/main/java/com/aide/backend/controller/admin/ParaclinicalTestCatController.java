@@ -1,7 +1,7 @@
 package com.aide.backend.controller.admin;
 
 import com.aide.backend.common.BaseResponse;
-import com.aide.backend.domain.dto.common.PageResponse;
+import com.aide.backend.common.PageResponse;
 import com.aide.backend.domain.dto.patients.ParaclinicalCateDTO;
 import com.aide.backend.service.ParaclinicalCateService;
 import io.swagger.v3.oas.annotations.Operation;

@@ -1,14 +1,12 @@
 package com.aide.backend.service.impl;
 
-import com.aide.backend.domain.dto.common.PageResponse;
+import com.aide.backend.common.PageResponse;
 import com.aide.backend.domain.dto.patients.ClinicalCateDTO;
 import com.aide.backend.domain.entity.patients.ClinicalCate;
 import com.aide.backend.exception.ResourceNotFoundException;
 import com.aide.backend.repository.ClinicalExamCategoryRepository;
 import com.aide.backend.service.ClinicalCateService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
