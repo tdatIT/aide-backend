@@ -91,6 +91,6 @@ public class GlobalExceptionHandler {
         log.error("Unexpected error occurred", ex);
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(BaseResponse.error(ex.getMessage()));
+                .body(BaseResponse.error("An unexpected error occurred. Please try again later."));
     }
 }
