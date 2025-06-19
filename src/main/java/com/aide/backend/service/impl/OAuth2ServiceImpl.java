@@ -3,6 +3,7 @@ package com.aide.backend.service.impl;
 import com.aide.backend.domain.dto.auth.LoginResponse;
 import com.aide.backend.domain.dto.auth.UserProfileDTO;
 import com.aide.backend.domain.entity.user.AuthUserDetails;
+import com.aide.backend.domain.entity.user.Role;
 import com.aide.backend.domain.entity.user.User;
 import com.aide.backend.domain.entity.user.UserCredential;
 import com.aide.backend.domain.enums.CredentialType;
@@ -82,7 +83,12 @@ public class OAuth2ServiceImpl implements OAuth2Service {
             return LoginResponse.builder().accessToken(jwtAccessToken)
                     .refreshToken(refreshToken)
                     .expiresIn(24 * 60 * 60)
-                    .profile(UserProfileDTO.builder().fullName(name).username(email).avatar(avatar).build())
+                    .profile(UserProfileDTO.builder()
+                            .id(user.getId())
+                            .fullName(name)
+                            .username(email)
+                            .avatar(avatar)
+                            .roles(user.getRoles().stream().map(Role::getRoleName).toArray(String[]::new)).build())
                     .build();
         } catch (Exception e) {
             log.error("Error processing Google access token: {}", e.getMessage(), e);
@@ -94,11 +100,6 @@ public class OAuth2ServiceImpl implements OAuth2Service {
         var userRole = roleRepository.findByRoleName(RoleEnum.ROLE_USER.toString()).
                 orElseThrow(() -> new ResourceNotFoundException("User role not found"));
 
-        var googleCred = UserCredential.builder()
-                .credType(CredentialType.OIDC)
-                .provider("GOOGLE")
-                .oidcUserId(googleId)
-                .active(true).build();
 
         var user = User.builder()
                 .email(email)
@@ -107,6 +108,14 @@ public class OAuth2ServiceImpl implements OAuth2Service {
                 .avatarUrl(avatar)
                 .active(true)
                 .build();
+
+        var googleCred = UserCredential.builder()
+                .credType(CredentialType.OIDC)
+                .provider("GOOGLE")
+                .oidcUserId(googleId)
+                .user(user)
+                .active(true).build();
+
         user.setCredentials(Set.of(googleCred));
         user.setRoles(Set.of(userRole));
         return userRepository.save(user);
