@@ -19,7 +19,7 @@ import org.springframework.data.redis.serializer.*;
 
 import java.time.Duration;
 
-import static com.aide.backend.config.Constants.DEFAULT_TTL_MIN;
+import static com.aide.backend.domain.constant.Constants.DEFAULT_TTL_MIN;
 
 @Configuration
 public class RedisConfig {

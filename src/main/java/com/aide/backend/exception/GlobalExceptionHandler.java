@@ -1,6 +1,7 @@
 package com.aide.backend.exception;
 
 import com.aide.backend.common.BaseResponse;
+import com.aide.backend.domain.constant.ResponseCode;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -25,31 +26,24 @@ public class GlobalExceptionHandler {
         log.error("Business error occurred: {}", ex.getMessage());
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(BaseResponse.error(ex.getMessage()));
+                .body(BaseResponse.error(ResponseCode.BUSINESS_ERROR, ex.getMessage()));
     }
 
-    @ExceptionHandler(ResourceNotFoundException.class)
+    @ExceptionHandler({ResourceNotFoundException.class, NoResourceFoundException.class})
     public ResponseEntity<BaseResponse<Void>> handleResourceNotFoundException(ResourceNotFoundException ex) {
         log.error("Resource not found: {}", ex.getMessage());
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
-                .body(BaseResponse.error(ex.getMessage()));
+                .body(BaseResponse.error(ResponseCode.NOT_FOUND, ex.getMessage()));
     }
 
-    @ExceptionHandler(NoResourceFoundException.class)
-    public ResponseEntity<BaseResponse<Void>> handleNoResourceFoundException(NoResourceFoundException ex) {
-        log.error("Resource not found: {}", ex.getMessage());
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(BaseResponse.error("Resource not found"));
-    }
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<BaseResponse<Void>> handleBadCredentialsException(BadCredentialsException ex) {
         log.error("Authentication failed: {}", ex.getMessage());
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
-                .body(BaseResponse.error("Invalid username or password"));
+                .body(BaseResponse.error(ResponseCode.UNAUTHORIZED, "Invalid username or password"));
     }
 
     @ExceptionHandler(AccessDeniedException.class)
@@ -57,7 +51,7 @@ public class GlobalExceptionHandler {
         log.error("Access denied: {}", ex.getMessage());
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
-                .body(BaseResponse.error("Access denied"));
+                .body(BaseResponse.error(ResponseCode.FORBIDDEN, "Access denied"));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -70,7 +64,7 @@ public class GlobalExceptionHandler {
         });
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(BaseResponse.error("Validation failed"));
+                .body(BaseResponse.error(ResponseCode.BAD_REQUEST, "Validation failed"));
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
@@ -83,7 +77,7 @@ public class GlobalExceptionHandler {
         });
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(BaseResponse.error("Validation failed"));
+                .body(BaseResponse.error(ResponseCode.BAD_REQUEST, "Validation failed"));
     }
 
     @ExceptionHandler(Exception.class)
@@ -91,6 +85,6 @@ public class GlobalExceptionHandler {
         log.error("Unexpected error occurred", ex);
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(BaseResponse.error("An unexpected error occurred. Please try again later."));
+                .body(BaseResponse.error(ResponseCode.INTERNAL_SERVER_ERROR, "An unexpected error occurred. Please try again later."));
     }
 }

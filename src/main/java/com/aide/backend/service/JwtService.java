@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-import static com.aide.backend.config.Constants.*;
+import static com.aide.backend.domain.constant.Constants.*;
 
 @Slf4j
 @Service

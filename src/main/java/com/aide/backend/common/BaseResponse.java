@@ -1,5 +1,6 @@
 package com.aide.backend.common;
 
+import com.aide.backend.domain.constant.ResponseCode;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,28 +11,28 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BaseResponse<T> {
-    private boolean success;
+    private int code;
     private String message;
     private T data;
 
     public static <T> BaseResponse<T> success(T data) {
         return BaseResponse.<T>builder()
-                .success(true)
+                .code(ResponseCode.SUCCESS)
                 .data(data)
                 .build();
     }
 
     public static <T> BaseResponse<T> success(String message, T data) {
         return BaseResponse.<T>builder()
-                .success(true)
+                .code(ResponseCode.SUCCESS)
                 .message(message)
                 .data(data)
                 .build();
     }
 
-    public static <T> BaseResponse<T> error(String message) {
+    public static <T> BaseResponse<T> error(int code, String message) {
         return BaseResponse.<T>builder()
-                .success(false)
+                .code(code)
                 .message(message)
                 .build();
     }

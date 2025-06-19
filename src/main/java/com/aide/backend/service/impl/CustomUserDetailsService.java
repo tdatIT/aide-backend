@@ -23,14 +23,11 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         var user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
-        var cred = userCredentialRepository.findByUsernameAndCredType(username, CredentialType.PASSWORD).orElseThrow(
-                () -> new UsernameNotFoundException("Credential not found for user: " + username));
-
-
+        
         return new AuthUserDetails(
                 user.getId(),
                 user.getUsername(),
-                cred.getPassword(),
+                "",
                 user.isActive(),
                 true,
                 true,

@@ -19,7 +19,6 @@ import com.openai.models.responses.Response;
 import com.openai.models.responses.ResponseCreateParams;
 import com.openai.models.responses.ResponseOutputText;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -28,9 +27,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 
-import static com.aide.backend.config.Constants.*;
+import static com.aide.backend.domain.constant.Constants.*;
 import static com.aide.backend.config.OpenAIClient.PATIENT_ASSISTANT_PROMPT_ID;
 import static com.aide.backend.config.OpenAIClient.PATIENT_PROMPT_VERSION;
 

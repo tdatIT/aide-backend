@@ -12,6 +12,10 @@ import java.util.Optional;
 public interface UserCredentialRepository extends JpaRepository<UserCredential, Long> {
     Optional<UserCredential> findByUserIdAndCredType(Long userId, CredentialType credType);
 
-    @Query("select cred from UserCredential cred where cred.user.username = :username and cred.credType = :credType and  cred.active = true")
+    @Query("select cred from UserCredential cred where cred.user.username = :username " +
+            "and cred.credType = :credType " +
+            "and cred.active = true")
     Optional<UserCredential> findByUsernameAndCredType(String username, CredentialType credType);
+
+
 }

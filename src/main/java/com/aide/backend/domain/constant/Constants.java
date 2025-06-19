@@ -1,4 +1,4 @@
-package com.aide.backend.config;
+package com.aide.backend.domain.constant;
 
 public class Constants {
     public static final Integer EXAM_SESSION_DURATION_MINUTES = 10; // Example duration for exam sessions

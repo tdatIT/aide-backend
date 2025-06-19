@@ -27,7 +27,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import static com.aide.backend.config.Constants.MAX_ACCESS_TOKEN_EXP;
+import static com.aide.backend.domain.constant.Constants.MAX_ACCESS_TOKEN_EXP;
 
 @Slf4j
 @Service

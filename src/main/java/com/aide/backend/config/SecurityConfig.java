@@ -28,6 +28,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.aide.backend.domain.constant.ResponseCode.UNAUTHORIZED;
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -61,7 +63,7 @@ public class SecurityConfig {
                             response.setContentType("application/json");
                             response.setCharacterEncoding("UTF-8");
 
-                            BaseResponse<?> errorResponse = BaseResponse.error("Unauthorized access. Authentication is required");
+                            BaseResponse<?> errorResponse = BaseResponse.error(UNAUTHORIZED, "Unauthorized access. Authentication is required");
                             response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
                         })
                 )
